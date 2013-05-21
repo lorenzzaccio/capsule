@@ -203,7 +203,7 @@ function changeArrayValue(row,col,newValue)
 function createHeader(divId,tableId,headers){
     var root=document.getElementById(divId);
     //var nrRows=indexId;
-    var nrCols=COL_NUMBER;
+    var nrCols=headers.length; //COL_NUMBER;
     var tab=document.createElement('table');
     tab.className="";//tablesorter";
     tab.border=1;
@@ -238,11 +238,15 @@ function readRow(tableId,index){
     }
     return arrow;
 }
+function readCell(tableId,row,col){
+    var arrow = readRow(tableId,row);
+    return arrow[col-1];
+}
 
 function removeRow(i,tableId){
-    var index = getCell("myTable",i,INDEX_HEADER);
+    var index = readCell("myTable",i,INDEX_HEADER);
     document.getElementById(tableId).deleteRow(i);
     //remove it from cookie
-    deleteCookie(index);
+    deleteCookie(index,"username");
                 
 }

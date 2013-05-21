@@ -1,0 +1,1795 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+        <link rel="stylesheet" href="css/myStyle.css" type="text/css" />
+        <title>Caps Creator</title>
+        <style type="text/css"></style>
+        <script type="text/javascript" src="jquery/jquery-1.7.2.js"></script>
+        <script type="text/javascript" src="jquery/jquery.svg.js"></script>
+        <script type="text/javascript" src="jquery/jquery.svgdom.js"></script>
+        <script type="text/javascript" src="lib/font/fontdetect.js"></script>
+        <script type="text/javascript" src="lib/cookie_caps.js"></script>
+        <script type="text/javascript" src="lib/cookie_view.js"></script>
+        <script type="text/javascript" src="lib/cookie.js"></script>
+        
+       
+
+        <script type="text/javascript">
+    
+            //global vars
+            var COL_NUMBER = 12;
+            var g;
+            var indexId =0;
+            var tableDesc = [];
+            var tableHeader = [];
+            var tabLogo = [];
+            var primaire = [];
+            var x0 = 0;
+            var y0 = 0;
+            var zoomx = 10 ;
+            var zoomy = 10 ;
+            var zoomh = 150;
+            var zoomw = 150;
+            var transx = 0 ;
+            var transy = 0;
+            var transrect1x = 0;
+            var transrect1y = 0;
+            var translogox = 0;
+            var translogoy = 0;
+            var indexRow = 0;
+            var ratioZoom = 1;
+            var dx = 0;
+            var dy = 0;
+            var decalageVueAvantx = 200;
+            var decalageVueAvanty = 0;
+            var decalageVueArrx = 300;
+            var decalageVueArry = 0;
+            var decalageDevCannelurex = 0;
+            var decalageDevCannelurey = 0;
+            
+            var conicite = 0;
+            var fonts = [];
+            var defaultValue = [];
+            var selectedItem;
+            
+            //variables ouverture facile dev
+            var hauteurDuBord = 0;
+            var bord_liseret = 0;
+            var hauteurBandeCannelure = 6;
+            var poshauteurBandeTirete = 7;
+            var epaisseurTete = 2;
+            var largeurBandeTirete = 30;
+            var profondeurEncoche = 4;
+            var myMapApp ;
+            var screenW=0;
+            var screenH=0;
+
+
+            $(function(){
+                $('#svgbasics').svg({onLoad: drawInitial});
+                //$('#rect,#line,#circle,#ellipse,#control').click(drawCaps);
+                /*$('#clear').click(function() {
+                    $('#svgbasics').svg('get').clear();
+                });
+                $('#export').click(function() {
+                    var xml = $('#svgbasics').svg('get').toSVG();
+                    $('#svgexport').html(xml.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+                });*/
+                //$('#svgmenu').svg({onLoad: displayMenu});
+            });
+
+
+            $(document).ready(function() 
+            { 
+                var tableHeader = loadHeader();
+                createHeader("footer","myTable",tableHeader);
+                //$("#myTable").tablesorter({widthFixed: true, widgets: ['zebra']});
+                initEvent();
+                readCookie();
+                //drawcaps();
+            });
+            
+            function drawInitial(svg) {
+                //populateFontCombo("fontCombo");
+                //populateTailleCombo("tailleCombo");
+                //document.getElementById('tailleCombo').value=7;
+                initViewport();
+                load_combo_type();
+                readViewCookie();
+                //testFullScreen();
+                //myMapApp = new mapApp(false,undefined);
+            }
+            
+            function initViewport(){
+                var mydiv = document.getElementById("svgbasics");
+                screenW = mydiv.offsetWidth;
+                screenH = mydiv.offsetHeight;
+                zoomx = 0 ;
+                zoomy = 0 ;
+                zoomh = screenH;
+                zoomw = screenW;
+                readViewCookie();
+                ratioZoom = zoomh/screenH;
+                //document.getElementById("wheelvalue").value=ratioZoom;
+                updateViewBox();
+            }
+            
+            
+            function loadDefaultValue(type){
+                if(type=="vueDev"){
+                    defaultValue[1] = 0;
+                    defaultValue[2] = "4.22";
+                    defaultValue[3] = "orange";
+                    defaultValue[4] = 122;
+                    defaultValue[5] = 34;
+                    defaultValue[6] = "jonc cannelure";
+                    defaultValue[7] = "class open";
+                    defaultValue[8] = "helio";
+                    defaultValue[9] = 0;
+                    defaultValue[10] = 0;
+                }
+                
+                if(type=="vueAvant"){
+                    defaultValue[1] = decalageVueAvantx;
+                    defaultValue[2] = decalageVueAvanty;
+                    defaultValue[3] = "orange";
+                    defaultValue[4] = 0;
+                    defaultValue[5] = 0;
+                    defaultValue[6] = "jonc cannelure";
+                    defaultValue[7] = "class open";
+                    defaultValue[8] = "helio";
+                    defaultValue[9] = 0;
+                    defaultValue[10] = 1;
+                }
+                if(type=="vueArriere"){
+                    defaultValue[1] = decalageVueArrx;
+                    defaultValue[2] = decalageVueArry;
+                    defaultValue[3] = "orange";
+                    defaultValue[4] = 0;
+                    defaultValue[5] = 0;
+                    defaultValue[6] = "jonc cannelure";
+                    defaultValue[7] = "class open";
+                    defaultValue[8] = "helio";
+                    defaultValue[9] = 0;
+                    defaultValue[10] = 2;
+                }
+                if(type=="texte"){
+                    defaultValue[1] = "champagne";
+                    defaultValue[2] = fonts[0];
+                    defaultValue[3] = "black";
+                    defaultValue[4] = "7";
+                    defaultValue[5] = "23";
+                    defaultValue[6] = "1";
+                    defaultValue[7] = "0.1";
+                    defaultValue[8] = "mac";
+                    defaultValue[9] = 0;
+                    defaultValue[10] = 20;
+                }
+                
+                if(type=="liseret"){
+                    defaultValue[1] = 0;
+                    defaultValue[2] = 0;
+                    defaultValue[3] = "black";
+                    defaultValue[4] = "10";
+                    defaultValue[5] = "0";
+                    defaultValue[6] = "1";
+                    defaultValue[7] = "0.1";
+                    defaultValue[8] = "mac";
+                    defaultValue[9] = 0;
+                    defaultValue[10] = 30;
+                }
+                
+                if(type=="logo"){
+                    defaultValue[1] = 0;
+                    defaultValue[2] = 0;
+                    defaultValue[3] = 0;
+                    defaultValue[4] = 0.2;
+                    defaultValue[5] = 0;
+                    defaultValue[6] = 1;
+                    defaultValue[7] = 0;
+                    defaultValue[8] = "mac";
+                    defaultValue[9] = "miniLogoCapsTech.svg";
+                    defaultValue[10] = 50;
+                }
+                
+                if(type=="cotation"){
+                    defaultValue[1] = decalageVueAvantx;
+                    defaultValue[2] = decalageVueAvanty;
+                    defaultValue[3] = "red";
+                    defaultValue[4] = "black";
+                    defaultValue[5] = 0;
+                    defaultValue[6] = 0;
+                    defaultValue[7] = 0;
+                    defaultValue[8] = 0;
+                    defaultValue[9] = 0;
+                    defaultValue[10] = 80;
+                }
+                
+                if(type=="cartouche"){
+                    defaultValue[1] = 1;
+                    defaultValue[2] = -100;
+                    defaultValue[3] = 450;
+                    defaultValue[4] = 0.55;
+                    defaultValue[5] = 0;
+                    defaultValue[6] = 1;
+                    defaultValue[7] = 0;
+                    defaultValue[8] = "mac";
+                    defaultValue[9] = "cartouche.svg";
+                    defaultValue[10] = 100;
+                }
+                
+            }
+
+ 
+
+            function loadHeader(){
+                tableHeader[0] = " ";
+                tableHeader[1] = "Type";
+                tableHeader[2] = "Texte";
+                tableHeader[3] = "Font";
+                tableHeader[4] = "Couleur";
+                tableHeader[5] = "SizeFont";
+                tableHeader[6] = "DistanceBord";
+                tableHeader[7] = "Cote";
+                tableHeader[8] = "widthStroke";	
+                tableHeader[9] = "typeImp";
+                tableHeader[10] = "linkFile";
+                tableHeader[11] = "ordre";
+                return tableHeader;
+            }
+
+            function trim(str){
+                var outStr = str.replace(/^\s+|\s+$/g, '') ;
+                return outStr;
+            }
+            function addRow(tableId){
+                var add = 0;
+                var arrow = new Array(COL_NUMBER);
+                var type = trim(document.getElementById('typeCombo').value);
+                loadDefaultValue(type);
+                
+                if(type == "vueDev"){
+                    add = 1;
+                    var texte=	defaultValue[1];//trim(document.checkForm.text.value);
+                    var font = defaultValue[2];//document.getElementById('fontCombo').value;
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = defaultValue[4];//document.getElementById('tailleCombo').value;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = defaultValue[6];//document.checkForm.cote.value;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = defaultValue[9];//"";
+                    var ordre = defaultValue[10];
+                }
+                
+                if(type == "vueAvant"){
+                    add = 1;
+                    var texte=	defaultValue[1];//trim(document.checkForm.text.value);
+                    var font = defaultValue[2];//document.getElementById('fontCombo').value;
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = defaultValue[4];//document.getElementById('tailleCombo').value;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = defaultValue[6];//document.checkForm.cote.value;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = defaultValue[9];//"";
+                    var ordre = defaultValue[10];
+                }
+                
+                if(type == "vueArriere"){
+                    add = 1;
+                    var texte=	defaultValue[1];//trim(document.checkForm.text.value);
+                    var font = defaultValue[2];//document.getElementById('fontCombo').value;
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = defaultValue[4];//document.getElementById('tailleCombo').value;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = defaultValue[6];//document.checkForm.cote.value;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = defaultValue[9];//"";
+                    var ordre = defaultValue[10];
+                }
+                
+                if(type == "texte"){
+                    add = 1;
+                    var texte=	defaultValue[1];//trim(document.checkForm.text.value);
+                    var font = defaultValue[2];//document.getElementById('fontCombo').value;
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = defaultValue[4];//document.getElementById('tailleCombo').value;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = defaultValue[6];//document.checkForm.cote.value;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = defaultValue[9];//"";
+                    var ordre = defaultValue[10];
+                }
+	
+                if(type == "liseret"){
+                    add = 1;
+                    var texte = "";
+                    var font = "";
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = 0;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = 0;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = "";
+                    var ordre = defaultValue[10];
+                }
+	
+                if(type == "logo"){
+                    add = 1;
+                    var texte = defaultValue[1];//index
+                    var font = defaultValue[2];//posx
+                    var couleur = defaultValue[3];//posy
+                    var sizeFont = defaultValue[4];//scale
+                    var distanceBord = defaultValue[5];
+                    var cote = defaultValue[6];
+                    var widthStroke = defaultValue[7];
+                    var typeImpression = defaultValue[8];
+                    var linkFile = defaultValue[9];
+                    var ordre = defaultValue[10];
+                }
+                
+                if(type == "cotation"){
+                    add = 1;
+                    var texte=	defaultValue[1];//trim(document.checkForm.text.value);
+                    var font = defaultValue[2];//document.getElementById('fontCombo').value;
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = defaultValue[4];//document.getElementById('tailleCombo').value;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = defaultValue[6];//document.checkForm.cote.value;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = defaultValue[9];//"";
+                    var ordre = defaultValue[10];
+                }
+                
+                if(type == "cartouche"){
+                    add = 1;
+                    var texte = defaultValue[1];//index
+                    var font = defaultValue[2];//posx
+                    var couleur = defaultValue[3];//posy
+                    var sizeFont = defaultValue[4];//scale
+                    var distanceBord = defaultValue[5];
+                    var cote = defaultValue[6];
+                    var widthStroke = defaultValue[7];
+                    var typeImpression = defaultValue[8];
+                    var linkFile = defaultValue[9];
+                    var ordre = defaultValue[10];
+                }
+                
+                if(add ==1){
+                    arrow[0] = 0; //btn
+                    arrow[1] = type;
+                    arrow[2] = texte;
+                    arrow[3] = font;
+                    arrow[4] = couleur;
+                    arrow[5] = sizeFont;
+                    arrow[6] = distanceBord;
+                    arrow[7] = cote;
+                    arrow[8] = widthStroke;
+                    arrow[9] = typeImpression;
+                    arrow[10] = linkFile;
+                    arrow[11] = ordre;
+                    
+                    insertRow(arrow,tableId);
+                    var nbrRow = document.getElementById(tableId).rows.length -2;
+                    setCookie(COOKIE_NAME+nbrRow,arrow,5);
+                    drawcaps();
+                }
+                
+                //insertRow(arrow,tableId);
+                //setCookie("username"+window.indexRow,arrow,5);
+                //indexRow ++;
+            }
+
+            function createHeader(divId,tableId,headers){
+                var root=document.getElementById(divId);
+                //var nrRows=indexId;
+                var nrCols=COL_NUMBER;
+                var tab=document.createElement('table');
+                tab.className="";//tablesorter";
+                tab.border=1;
+                tab.cellPadding=0;
+                tab.cellSpacing=1;
+                tab.id = tableId;
+                //tab.onclick = function(){handleClick(event) }; 
+                var tbh=document.createElement('thead');
+                var rowh = document.createElement('tr');
+                var cellh;
+                for(var k=0;k<nrCols;k++){
+                    cellh = document.createElement('th');
+                    cellh.className="header";
+                    cellh.appendChild(document.createTextNode(headers[k]));
+                    rowh.appendChild(cellh);
+                }
+                tbh.appendChild(rowh);
+	
+                var tbo=document.createElement('tbody');
+
+                tab.appendChild(tbh);
+                tab.appendChild(tbo);
+                root.appendChild(tab);
+                $("table").trigger("update"); 
+                // set sorting column and direction, this will sort on the first and third column 
+                var sorting = [[2,1],[0,0]]; 
+                // sort on the first column 
+                $("table").trigger("sorton",[sorting]); 
+
+            }
+            
+            function readRow(tableId,index){
+                var arrow = [];
+                var rowLength = document.getElementById(tableId).rows[index].cells.length;
+                var arrow = Array(rowLength);
+                var i;
+                for (i=1; i<rowLength; i++){
+                    arrow[i] = document.getElementById(tableId).rows[index].cells[i].childNodes[0].data;
+                    //alert(arrow[i]);
+                }
+                return arrow;
+            }
+
+            function removeRow(i){
+                document.getElementById('myTable').deleteRow(i)
+            }
+
+            function addHeader(tableId){
+                var theTable = document.getElementById(tableId);
+                for( var x = 0; x < theTable.tHead.rows.length; x++ ) {
+                    var y = document.createElement('td');
+                    y.appendChild(document.createTextNode('Thead cell text'));
+                    theTable.tHead.rows[x].appendChild(y);
+                }
+            }
+            function changeCell(tableId,row,col,newValue)
+            {
+                var arrCook = new Array(COL_NUMBER);
+                var x=document.getElementById(tableId).rows[row].cells;
+                x[col].innerHTML=newValue;
+                for(var i = 1;i<COL_NUMBER;i++){
+                    arrCook[i] = x[i].innerHTML;
+                }
+                setCookie("username"+(row-1),arrCook,5);
+            }
+
+
+
+            function getCell(tableId,row,col){
+                var theTable = document.getElementById(tableId);
+                var rowCount = theTable.rows.length;
+
+                var toto = theTable.rows[rowCount-1].cells[1].innerText
+                var cell;
+    
+                var z = 0;
+                if(theTable.tBodies.length>0){
+                    cell=theTable.tBodies[z].rows[row].cells[col];
+                }
+                return cell;
+            }
+
+            function insertRow(arrow,tableId){
+                var theTable = document.getElementById(tableId);
+                var buttonnode;
+                var nbrRow = document.getElementById(tableId).rows.length - 2;
+                buttonnode= document.createElement('input');
+                buttonnode.setAttribute('type','button');
+                buttonnode.setAttribute('name','btn'+nbrRow);
+                buttonnode.setAttribute('value','remove');
+                buttonnode.onclick = function(){removeRow(this.parentNode.parentNode.rowIndex) }; 
+                var nbrCols = COL_NUMBER;
+                var z = 0;
+                var ci = 0;
+                var value;
+                if(theTable.tBodies.length>0){
+                    var row=theTable.tBodies[z].insertRow(-1); //insert at the end
+                    for( var x = 0; x < nbrCols; x++ ) {
+                        var y = document.createElement('td');
+                        if(x==0)
+                            y.appendChild(buttonnode);
+                        else{
+                            if(x<arrow.length)
+                                y.appendChild(document.createTextNode(arrow[x]));
+                            else
+                                y.appendChild(document.createTextNode(""));
+                            y.onclick = function(){ 
+                                value=prompt("Please enter value:","");
+                                if (value!=null && value!="")
+                                {
+                                    ci = this.cellIndex;
+                                }
+                            }
+                        }
+                        row.appendChild(y);
+                        theTable.tBodies[z].appendChild(row);
+                    }
+                    row.onclick = function(){
+                        changeCell(tableId,row.rowIndex,ci,value);
+                        drawcaps();
+                    } 
+                }
+            }
+
+            function addFooter(tableId){
+                var theTable = document.getElementById(tableId);
+                for( var x = 0; x < theTable.tFoot.rows.length; x++ ) {
+                    var y = document.createElement('td');
+                    y.appendChild(document.createTextNode('Tfoot cell text'));
+                    theTable.tFoot.rows[x].appendChild(y);
+                }
+            }
+
+            /**
+             * other stuff
+             */
+	 
+            function font_init() {
+                //var fonts = [];
+                var results = [];
+                var d = new Detector();
+                fonts.push("cursive");
+                fonts.push("monospace");
+                fonts.push("serif");
+                fonts.push("sans-serif");
+                fonts.push("fantasy");
+                fonts.push("default");
+                fonts.push("Arial");
+                fonts.push("Arial Black");
+                fonts.push("Arial Narrow");
+                fonts.push("Arial Rounded MT Bold");
+                fonts.push("Bookman Old Style");
+                fonts.push("Bradley Hand ITC");
+                fonts.push("Century");
+                fonts.push("Century Gothic");
+                fonts.push("Comic Sans MS");
+                fonts.push("Courier");
+                fonts.push("Courier New");
+                fonts.push("Georgia");
+                fonts.push("Gentium");
+                fonts.push("Impact");
+                fonts.push("King");
+                fonts.push("Lucida Console");
+                fonts.push("Lalit");
+                fonts.push("Modena");
+                fonts.push("Monotype Corsiva");
+                fonts.push("Papyrus");
+                fonts.push("Tahoma");
+                fonts.push("TeX");
+                fonts.push("Times");
+                fonts.push("Times New Roman");
+                fonts.push("Trebuchet MS");
+                fonts.push("Verdana");
+                fonts.push("Verona");
+                fonts.push("Zapfino");
+                var fontArray = [];
+                var j=0;
+                for (i = 0; i < fonts.length; i++) {
+                    var result = d.detect(fonts[i]);
+                    if(result) {
+                        fontArray.push(fonts[i]);
+                    }
+                }
+                return fontArray;
+            }
+	
+            function taille_init(){
+                var fontArray = [];
+                var j=0;
+                for (i = 1; i <= 50; i++) {
+                    fontArray.push(i);
+                }
+                return fontArray;
+            }
+
+            function load_combo_type(){
+                var typeOptions = [];	
+                typeOptions[0] = "vueDev";
+                typeOptions[1] = "vueAvant";
+                typeOptions[2] = "vueArriere";
+                typeOptions[3] = "vueCoteDroit";
+                typeOptions[4] = "vueCoteGauche";
+                typeOptions[5] = "texte";
+                typeOptions[6] = "liseret";
+                typeOptions[7] = "logo";
+                typeOptions[8] = "cotation";
+                typeOptions[9] = "cartouche";
+	
+                load_combo("typeCombo",typeOptions);
+            }
+            function add_option (select_id, text) {
+                var select = document.getElementById(select_id);
+                select.options[select.options.length] = new Option(text);
+            }
+
+            function load_combo (select_id, option_array) {
+                for (var i = 0; i < option_array.length; i++) {
+                    add_option (select_id, option_array[i]);
+                }
+            }
+            
+            function loadSvg(){
+                $.get('dessin.svg', function(svg){
+                    console.log( svg );
+                }, 'text');
+            }
+
+
+     
+            function Start (data) {
+                // Create an instance of StreamWriter to write text to a file.
+                sw = new StreamWriter("TestFile.txt");
+                // Add some text to the file.
+                sw.Write("This is the ");
+                sw.WriteLine("header for the file.");
+                sw.WriteLine("-------------------");
+                // Arbitrary objects can also be written to the file.
+                sw.Write("The date is: ");
+                sw.WriteLine(DateTime.Now);
+                sw.WriteLine(data);
+                sw.Close();
+            }
+            
+            function testFullScreen(){
+                
+                var div = $('#svgbasics');
+                var beforeFullscreen = "";
+
+                $('#svgbasics').click(function(){
+
+                        if (!div.hasClass('fullscreen'))
+                        {
+                            var svg = $('#svgbasics').svg('get');//.setAttribute("transform", "rotate(90)");
+                            //var g = svg.group({id: 'mainGroup'});
+                            svg.configure({viewBox:-90+' '+-60+' '+460+' '+460});
+                            $(g).attr('transform', ' translate(180,40) rotate(90)');
+                            //
+                            //var svgDoc = svg.contentDocument; //get the inner DOM of alpha.svg
+                            //var svgRoot  = svgDoc.documentElement;
+
+                            //$('#svgbasics').attr('transform', 'rotate(60,50,50)');
+
+                            /*var group = svg.group(null,"tireteDevGroup",{transform:"rotate(90)"});
+                            var pathMask = svg.createPath(); 
+                            svg.path(group,pathMask.move(0, 0));*/
+                        
+                            beforeFullscreen = {
+                            parentElement: div.parent(),
+                            index: div.parent().children().index(div),
+                            x: $(window).scrollLeft(), y: $(window).scrollTop()
+                            };
+                            $('#svgmenu').svg('get').clear();
+                            $('html').css('overflow', 'hidden');
+                            $('body').css('overflow', 'hidden');
+                            $('body').append(div).css('overflow', 'hidden');
+                            div.addClass('fullscreen');
+                            window.scroll(0,0);
+                        }
+                        else
+                        {
+                            div.removeClass('fullscreen');
+                            if (beforeFullscreen.index >= beforeFullscreen.parentElement.children().length) {
+                            beforeFullscreen.parentElement.append(div);
+                            } else {
+                            div.insertBefore(beforeFullscreen.parentElement.children().get(beforeFullscreen.index));
+                            }
+                            $('body').css('overflow', 'visible');
+                            $('html').css('overflow', 'visible');
+                            window.scroll(beforeFullscreen.x, beforeFullscreen.y);
+                            drawcaps();
+                            displayMenu();
+                        }
+
+                        return false;
+
+                });
+            }
+
+            function exportSvg(){
+                
+                var content ;//= loadSvg();
+                document.getElementById("log").style.display = "block"; 
+                
+                var xml = $('#svgbasics').svg('get').toSVG();
+                content = xml.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') ;
+                $('#msg').html(content);
+                document.getElementById("log").innerText = content;
+            }
+	
+            function populateFontCombo(comboName){
+                var fontArray = [];
+                fontArray = font_init();
+                //load_combo(comboName,fontArray);	
+            }
+
+            function populateTailleCombo(comboName){
+                var fontArray = [];
+                fontArray = taille_init();
+                //load_combo(comboName,fontArray);	
+            }
+
+            
+            
+			
+            function initEvent(){
+                var mousewheelevt=(/Firefox/i.test(navigator.userAgent))? "DOMMouseScroll" : "mousewheel" //FF doesn't recognize mousewheel as of FF3.x 
+                if (document.attachEvent) //if IE (and Opera depending on user setting)
+                    document.attachEvent("on"+mousewheelevt, displaywheel)
+                else if (document.addEventListener) //WC3 browsers
+                    document.addEventListener(mousewheelevt, displaywheel, false)	
+					
+                $("svg").mousedown(function(e){
+                    /* Getting initial coordinates of pointer */
+                    var GetInitCoordx = e.clientX;
+                    var GetInitCoordy = e.clientY;
+
+                    /* When mouse is moved while down, then applies the transformation. */
+                    $(this).bind("mousemove.customName", function(e){
+                        dx = (e.clientX-GetInitCoordx)*ratioZoom;
+                        dy = (e.clientY-GetInitCoordy)*ratioZoom;
+                        if(selectedItem=="#rect1")
+                            $("svg").find(selectedItem).attr("transform", "translate("+String(dx+transrect1x)+","+String(dy+transrect1y)+")");
+                        if(selectedItem=="#vueAvant")
+                            $("svg").find("path").attr("transform", "translate("+String(dx+transx)+","+String(dy+transy)+")");
+                        if(selectedItem=="#logo0"){
+                            $("svg").find(selectedItem).attr("transform", "translate("+String(dx+translogox)+","+String(dy+translogoy)+") scale(0.2)");
+                        }
+						
+                    });
+
+                    /* When mouse button is released, move event is unbind */
+                    $(this).mouseup(function(e){
+                        $(this).unbind("mousemove.customName");
+                        if(selectedItem=="#rect1"){
+                            transrect1x = dx +transrect1x;// (-document.frmOne.transx.value);	
+                            transrect1y = dy +transrect1y;
+                        }
+                        if(selectedItem=="#logo0"){
+                            translogox = dx +translogox;	
+                            translogoy = dy +translogoy;
+                        }
+                        
+                        if(selectedItem=="#vueAvant"){
+                            transx = dx +transx;// (-document.frmOne.transx.value);	
+                            transy = dy +transy; // (-document.frmOne.transy.value);
+                        }
+                        dx=0;
+                        dy=0;
+                        
+                    });
+                });
+            }
+
+            function degToRad(angleDeg){
+                var angleRad = (angleDeg/180) * Math.PI;
+                return angleRad;
+            
+            }
+            
+            function radToDeg(angleRad){
+                var angleDeg = (angleRad/Math.PI) * 180;
+                return angleDeg;
+            
+            }
+            
+            
+            function calculPrimaires(diamTete,hauteurCaps,b_degre,b_min){
+                var b_deg = (((b_min/60)*100)/100 - (-b_degre));
+                var b_rad = degToRad(b_deg);
+	
+                var diamBase = 	(diamTete -(-2*hauteurCaps*Math.tan(b_rad)));
+                var a = Math.PI*Math.cos(b_rad)*(diamBase-diamTete)/hauteurCaps;//conicité développée
+                var h1 = hauteurCaps/Math.cos(b_rad);
+                var r = Math.PI*diamBase/a;
+	
+                primaire[0] = diamBase;
+                primaire[1] = a;
+                primaire[2] = h1;
+                primaire[3] = r;
+                primaire[4] = b_deg;
+                primaire[5] = b_rad;
+                primaire[6] = diamTete;
+                primaire[7] = hauteurCaps;
+            }
+
+            function getDiamBase(){
+                return primaire[0];
+            }
+
+            function getAngleDev(){
+                return primaire[1];
+            }
+
+            function getHauteurDev(){
+                return primaire[2];
+            }
+
+            function getRayonDev(){
+                return primaire[3];
+            }
+            
+            function getConicityDeg(){
+                return primaire[4];
+            }
+            
+            function getConicityRad(){
+                return primaire[5];
+            }
+            
+            function getDiamTete(){
+                return primaire[6];
+            }
+            
+            function getHauteurCaps(){
+                return primaire[7];
+            }
+
+            function setOrigin(){
+                x0 = 5;
+                y0 = (-getRayonDev()+getHauteurDev()+35) ;	
+            }
+
+            function getOriX(){
+                return x0;	
+            }
+
+            function getOriY(){
+                return y0;
+            }
+            
+            function updateViewBox(){	
+                var svg = $('#svgbasics').svg('get');
+                svg.configure({viewBox: zoomx+' '+zoomy+' '+zoomw+' '+zoomh}) 
+            }
+
+            
+            
+    
+            function drawcaps() {
+                var tableId = "myTable";
+                updateViewBox();
+
+                var hauteurCaps;
+                var conicite;
+                var a;
+                var h1;
+                var h;
+                var r;
+                var b_deg;
+                var b_rad;
+                var zoom=1;//3.54
+                var ax;
+                var ay;
+                var b=0;
+                var b_degre;
+                var b_min;
+                var diamTete;
+                var displayList = []; 
+	
+                $('#svgbasics').svg('get').clear();
+                g = $('#svgbasics').svg('get').group({id: 'mainGroup'});
+                //$('#svgmenu').svg('get').clear();
+                //displayMenu();
+                //createSpectrum();
+                var arrow = [];
+                var rowLength = 0;
+                if(document.getElementById(tableId)!= null)
+                    rowLength = document.getElementById(tableId).rows.length;    
+        
+                if(rowLength>0){
+                    
+                    var fx = x0;
+                    var fy = y0;
+                            
+                           
+                    var k =0;
+                    for(var j = 0 ; j< rowLength;j++){
+                        arrow= readRow(tableId,j);
+                        if(arrow[11]!=null){
+                            displayList[k] = j;
+                            k++;
+                        }
+                    }
+                    for(var j = 0 ; j<= 100;j++){
+                        for(var l = 1 ; l< k;l++){//on demarre à 1 car 0 c'est le header'
+                            arrow= readRow(tableId,displayList[l]);
+                            if(arrow[11] == j){
+                                if(arrow[1] == "vueDev"){
+                                    var texte =	arrow[2];//posx
+                                    conicite = arrow[3];//conicite
+                                    var couleur =arrow[4];//couleur de fond
+                                    hauteurCaps = arrow[5];//hauteur
+                                    diamTete = arrow[6];//diam tête
+                                    var cote = arrow[7];//deboitage cannelure
+                                    var widthStroke = arrow[8];//ouverture
+                                    var typeImpression = arrow[9];//imp
+                                    var linkFile = arrow[10];//motif special
+                                    var ordre = arrow[11];
+
+                                    var cone = conicite.split(".");
+                                    b_degre = cone[0];
+                                    b_min = cone[1];
+
+                                    calculPrimaires(diamTete,hauteurCaps,b_degre,b_min);
+
+                                    diamBase = getDiamBase();
+                                    a = getAngleDev();
+                                    h1 = getHauteurDev();
+                                    r = getRayonDev();
+                                    b_deg = getConicityDeg();
+                                    b_rad = getConicityRad();
+                                    //zoom=1;//3.54;
+                                    setOrigin();
+
+                                    ax = getOriX();
+                                    ay = getOriY() + r - h1;
+
+                                    bord_liseret = h1;
+                                    hauteurDuBord = 0;
+                                    //developpé
+                                    drawDev(ax,ay,r,a,h1,bord_liseret,hauteurDuBord,couleur,"white","black");
+
+                                    drawCannelureDev(r,h1,a,ax+decalageDevCannelurex,ay+decalageDevCannelurey,"gray",0.1,hauteurBandeCannelure - epaisseurTete);
+                                    drawTireteDev(r,h1,a,ax+decalageDevCannelurex,ay+decalageDevCannelurey,"black",0.1,poshauteurBandeTirete);
+                                    drawTireteDev(r,h1,a,ax+decalageDevCannelurex,ay+decalageDevCannelurey,"black",0.1,poshauteurBandeTirete+largeurBandeTirete);
+                            }
+                        
+                            if(arrow[1] == "vueAvant"){
+                                    decalageVueAvantx =	arrow[2];//posx
+                                    decalageVueAvanty = arrow[3];//posy
+                                    var couleur =arrow[4];//couleur de fond
+                                    //hauteurCaps = arrow[5];//hauteur
+                                    //diamTete = arrow[6];//diam tête
+                                    //var cote = arrow[7];//deboitage cannelure
+                                    var widthStroke = arrow[8];//ouverture
+                                    var typeImpression = arrow[9];//imp
+                                    var linkFile = arrow[10];//motif special
+                                    var ordre = arrow[11];
+
+                                    //vue avant
+                                    drawOreilleVueAvant(ax-(-decalageVueAvantx),ay-(-decalageVueAvanty)+getHauteurDev(),b_rad,hauteurCaps,diamTete,couleur,"white","black",poshauteurBandeTirete,largeurBandeTirete,profondeurEncoche);
+                                    drawVue("vueAvant",ax-(-decalageVueAvantx),ay-(-decalageVueAvanty)+getHauteurDev(),b_rad,hauteurCaps,diamTete,couleur,"white","black");
+
+                                    drawCannelureVue(r,h1,b_deg,ax-(-decalageVueAvantx),ay-(-decalageVueAvanty)+3,"gray",0.1,hauteurBandeCannelure);
+                                    drawTireteVue(r,h1,b_deg,ax-(-decalageVueAvantx),ay-(-decalageVueAvanty)+3,"black",0.1,poshauteurBandeTirete);
+                                    drawTireteVue(r,h1,b_deg,ax-(-decalageVueAvantx),ay-(-decalageVueAvanty)+3,"black",0.1,poshauteurBandeTirete+largeurBandeTirete);
+                            }
+                        
+                            if(arrow[1] == "cotation"){
+                                    //ajoute des cotations
+                                    var decalagex = -0.5;//décalage de la cote par rapport au dessin
+                                    var cotex = ax-(-decalageVueAvantx);
+                                    var cotey = ay-(-decalageVueAvanty)+getHauteurDev();
+                                    createCotation(decalagex+cotex+hauteurCaps*Math.tan(b_rad),cotey-hauteurCaps,getDiamTete(),0,0,0,getDiamTete(),5);
+                                    createCotation(decalagex+cotex,cotey,getDiamBase(),0,0,10,getDiamBase(),5);
+
+                            }
+                            if(arrow[1] == "vueArriere"){
+                                    decalageVueArrx = arrow[2];//posx
+                                    decalageVueArry = arrow[3];//posy
+                                    var couleur =arrow[4];//couleur de fond
+                                    //hauteurCaps = arrow[5];//hauteur
+                                    //diamTete = arrow[6];//diam tête
+                                    //var cote = arrow[7];//deboitage cannelure
+                                    var widthStroke = arrow[8];//ouverture
+                                    var typeImpression = arrow[9];//imp
+                                    var linkFile = arrow[10];//motif special
+                                    var ordre = arrow[11];
+
+                                    //vue arriere
+                                    drawOreilleVueArr(ax-(-decalageVueArrx),ay-(-decalageVueArry)+getHauteurDev(),b_rad,hauteurCaps,diamTete,couleur,"gray","gray",poshauteurBandeTirete,largeurBandeTirete,profondeurEncoche);
+                                    drawVue("vueArriere",ax-(-decalageVueArrx),ay-(-decalageVueArry)+getHauteurDev(),b_rad,hauteurCaps,diamTete,couleur,"white","black");
+                                    drawCannelureVue(r,h1,b_deg,ax-(-decalageVueArrx),ay-(-decalageVueArry)+3,"gray",0.1,hauteurBandeCannelure);
+                                    drawTireteVue(r,h1,b_deg,ax-(-decalageVueArrx),ay-(-decalageVueArry)+3,"black",0.1,poshauteurBandeTirete);
+                                    drawTireteVue(r,h1,b_deg,ax-(-decalageVueArrx),ay-(-decalageVueArry)+3,"black",0.1,poshauteurBandeTirete+largeurBandeTirete);
+                            }
+                        
+                        
+                            if(arrow[1] == "texte"){
+                                var texte = arrow[2];
+                                var font = arrow[3];
+                                var couleur =arrow[4];
+                                var sizeFont = arrow[5];
+                                var distanceBord = arrow[6];
+                                var cote = arrow[7];
+                                var widthStroke = arrow[8];
+                                var typeImpression = arrow[9];
+                                var linkFile = arrow[10];
+                                var ordre = arrow[11];
+
+                                var distBord = distanceBord;
+                                var taille = sizeFont;
+                                var bAxeSym = true;
+                                
+                                if(cote>10){
+                                    cote=cote-10;
+                                    bAxeSym = false;
+                                }
+                                //marque sur developpé
+                                createMarque(cote,distBord,texte,font,couleur,taille,widthStroke,a,r,ax,ay,fx,fy,bAxeSym);
+                                
+                                
+                                //Vue formée
+                                if(cote==3)
+                                    createMarquexy(cote,distBord,texte,font,couleur,taille,widthStroke,ax-(-decalageVueAvantx)-1,ay-(-decalageVueAvanty)+getHauteurDev(),bAxeSym);
+                                if(cote==1)
+                                    createMarquexy(cote,distBord,texte,font,couleur,taille,widthStroke,ax-(-decalageVueArrx)-1,ay-(-decalageVueArry)+getHauteurDev(),bAxeSym); 
+                            }
+                        
+                            if(arrow[1] == "liseret"){
+                                var texte = "";
+                                var font = "";
+                                var couleur = arrow[4];
+                                var sizeFont = 0;
+                                var distanceBord = arrow[6];
+                                var cote = 0;
+                                var epaisseur = arrow[8];
+                                var typeImpression = arrow[9];
+                                var linkFile = "";
+                                var ordre = arrow[11];
+
+                                drawLiseret(ax,ay,r,a,h1,epaisseur,distanceBord,couleur,couleur,couleur);
+                                //marque avant
+                                //if(cote == 1)
+                                    drawVueLiseret(ax-(-decalageVueAvantx),ay-(-decalageVueAvanty)+getHauteurDev(),b_rad,h,diamTete,couleur,"white","black",distanceBord,epaisseur);
+                                //if(cote == 3)
+                                    drawVueLiseret(ax-(-decalageVueArrx),ay-(-decalageVueArry)+getHauteurDev(),b_rad,h,diamTete,couleur,"white","black",distanceBord,epaisseur);
+                            }
+	
+                            if(arrow[1] == "logo"){
+                                var index = arrow[2];//texte
+                                var posx = arrow[3];//font
+                                var posy = arrow[4];//couleur
+                                var scale = arrow[5];//sizeFont
+                                var color = arrow[6];
+                                var cote = arrow[7];
+                                var widthStroke = arrow[8];//widthStroke
+                                var typeImpression = arrow[9];
+                                var linkFile = arrow[10];
+                                var ordre = arrow[11];
+
+                                if(cote==1)
+                                    displayLogo(ax-(-decalageVueArrx) - (-posx),ay-(-decalageVueArry)+getHauteurDev()- (-posy),color,widthStroke,index,scale,linkFile,0,1);
+                                if(cote==3)
+                                    displayLogo(ax-(-decalageVueAvantx) - (-posx),ay-(-decalageVueAvanty)+getHauteurDev()- (-posy),color,widthStroke,index,scale,linkFile,0,1);
+                                if(cote==4)
+                                    displayLogo(ax-(-decalageVueAvantx)-(-posx),ay-(-decalageVueAvanty)+getHauteurDev()- (-posy),color,index,scale,widthStroke,linkFile,0,0);
+
+                                var distBord = -posy;
+                                var x = xcoord(cote,distBord,"","","","","",a,r,ax /*- (-posx)*/,ay /*- (-posy)*/,fx,fy);
+                                var y = ycoord(cote,distBord,"","","","","",a,r,ax /*- (-posx)*/,ay /*- (-posy)*/,fx,fy);
+                                var alpha = (4-cote)*(a)/4;
+                                displayLogoDev(ax-(-posx),ay +getHauteurDev() -(-posy),distBord,index,scale,linkFile,radToDeg(alpha),fx,fy);
+                            }
+                        
+                            if(arrow[1] == "cartouche"){
+                                var index = arrow[2];//texte
+                                var posx = arrow[3];//font
+                                var posy = arrow[4];//couleur
+                                var scale = arrow[5];//sizeFont
+                                var color = arrow[6];
+                                var cote = arrow[7];
+                                var widthStroke = arrow[8];//widthStroke
+                                var typeImpression = arrow[9];
+                                var linkFile = arrow[10];
+                                var ordre = arrow[11];
+
+                                displayLogo(fx - (-posx),fy- (-posy),color,index,scale,widthStroke,linkFile,0,0);
+                            }
+                        }
+                      }
+                    }
+                    for(var j = 0 ; j< rowLength;j++){
+                        arrow= readRow(tableId,j);
+                    }
+                }else{
+                    //alert("tbl is null");
+                }
+                
+            }
+   
+            function createSpectrum(){
+            $('#spektrum').svg(function (svg) {
+                for (var l=380; l<780; l++) {
+                var color=nm2rgb(l);
+                var attr = {stroke:"none",fill:color};
+                var i = (l-380)+14;
+                svg.rect(4,i,35,1,attr); 
+                }
+            });
+            
+            $('#spektr_ind_Pfeil').svg(function(svg){
+                var g1 = svg.group();
+                var pointerL=svg.path(g1,gl_pointerLeft,gl_pointer_attr);
+            });
+
+            $("#spektr_Fr").draggable({axis:"y",
+                containment: "#spektrum",
+                //scroll: false,
+                start: function(){$("#spektr_ind_Anz").html($("#spektr_Fr").css("top"));},
+                drag:function(){$("#spektr_ind_Anz").html(parseInt($("#spektr_Fr").css("top"))+380+" nm");},
+                stop:function(){
+                gl_Color=parseInt($("#spektr_ind_Anz").html());
+                newPlot();
+                        }
+             });
+                    
+            }
+            function drawVue(nomGroupe,orix,oriy,b,h,diamTete,color1,color2,strokeColor){
+                var ax = orix;
+                var ay = oriy;
+                var epaisseurRondelle = - 5;
+                var largeurBombe = 4;
+                var epaisseurBombe = -4;
+                var diamTeteSansBombe = (diamTete-2*largeurBombe)/2;
+                var angleDeg_bombe = 90;
+                var angleDeg_jonc = 180;
+                var epaisseurTete = Math.abs(epaisseurBombe)+ Math.abs(epaisseurRondelle);
+                var hauteurSansBombe = h-epaisseurTete;
+                var largeurConeUnCote = (getDiamBase()-diamTete)/2;// Math.tan(b)*hauteurSansBombe; 
+                var hauteurJusqueHauteurSansBombe = 1;
+                var epaisseurJonc = 4;
+                var hauteurJusqueDeboitage = hauteurSansBombe - hauteurJusqueHauteurSansBombe - epaisseurJonc;
+                
+                //var bx = ax + largeurConeUnCote;
+                //var by = ay + h - epaisseurTete;
+                
+                //var cx = bx + largeurBombe;
+                //var cy = by + epaisseurBombe; 
+
+                //var dx = cx + diamTeteSansBombe;
+                //var dy = cy + epaisseurRondelle;
+                //var ex = dx + diamTeteSansBombe;
+                //var ey = cy + epaisseurRondelle;
+                
+                var largeurBombeCustom = largeurBombe - (epaisseurBombe*Math.sin(Math.PI/2 - degToRad(angleDeg_bombe)));
+                var epaisseurBombeCustom = epaisseurBombe -  (largeurBombe*Math.sin(Math.PI/2 - degToRad(angleDeg_bombe)));
+                
+                var svg = $('#svgbasics').svg('get');
+	
+                var defs = svg.defs(); 
+                svg.linearGradient(defs, "Gradient", [["0%", color1,"100%"], ["100%", color2,"100%"]], ax, ay, ax+200, ay, {gradientUnits: "userSpaceOnUse"}); 
+                
+                var fillcolor = "url(#Gradient)";
+                
+                var strokeThin = 0.1;
+                var group = svg.group(g,nomGroupe,{fill:fillcolor , stroke: strokeColor, strokeWidth: strokeThin,transform:"translate("+transx+", "+transy+")"});  //transform:"scale("+zoomx+","+zoomy+")"
+                
+                var pathMask = svg.createPath(); 
+                svg.path(group,pathMask.move(ax, ay).line(Math.tan(b)*hauteurJusqueDeboitage,-hauteurJusqueDeboitage,1).arc(Math.abs(epaisseurJonc), Math.abs(epaisseurJonc), angleDeg_jonc, false, false, 0, -epaisseurJonc,true).line(Math.tan(b)*hauteurJusqueHauteurSansBombe,-hauteurJusqueHauteurSansBombe,1).arc(Math.abs(largeurBombe), Math.abs(epaisseurBombe), angleDeg_bombe, false, true, largeurBombeCustom, epaisseurBombeCustom,true).curveQ(diamTeteSansBombe, epaisseurRondelle, 2*diamTeteSansBombe,  0,1,0).arc(Math.abs(largeurBombe), Math.abs(epaisseurBombe), angleDeg_bombe, false, true, largeurBombeCustom, -epaisseurBombeCustom,true).line(Math.tan(b)*hauteurJusqueHauteurSansBombe,hauteurJusqueHauteurSansBombe,1).arc(Math.abs(epaisseurJonc), Math.abs(epaisseurJonc), angleDeg_jonc, false, false, 0, epaisseurJonc,true).line(largeurConeUnCote,hauteurJusqueDeboitage,1).close());
+                $("#"+nomGroupe, svg.root()).bind('click', svgClicked). bind('mouseover', svgOver).bind('mouseout', svgOut);
+            }
+            
+            function createCotation(pointAx,pointAy,distance,angle,posTextex,posTextey,value,largeurCote){
+                var svg = $('#svgbasics').svg('get');
+                var masktest = svg.group(g,"maskGrouptest",{fill: "none" , stroke: "red", strokeWidth: "0.2",transform:"translate("+transx+", "+transy+")"});  //transform:"scale("+zoomx+","+zoomy+")"
+                var pathMasktest = svg.createPath(); 
+                svg.path(masktest,pathMasktest.move(pointAx, pointAy).line(distance,0,1));
+                svg.path(masktest,pathMasktest.move(pointAx, pointAy+largeurCote).line(0,-2*largeurCote,1));
+                svg.path(masktest,pathMasktest.move(pointAx - (-distance), pointAy+largeurCote).line(0,-2*largeurCote,1));
+                var result=Math.round(value*10)/10;
+                createTextPath(pointAx+posTextex,pointAy-2+posTextey,distance,angle,"red", 0.2,result,"arial",5);
+            } 
+            
+            function createLinePath(pointAx,pointAy,distance,angle,color, epaisseurTrait,marqueId){
+                var svg = $('#svgbasics').svg('get');
+                var group = svg.group(g,"groupLinePath",{fill: "none" , stroke: "none", strokeWidth: "0.2",transform:"translate("+transx+", "+transy+")"}); 
+                var pathMasktest = svg.createPath(); 
+                svg.path(group, pathMasktest.move(pointAx,pointAy).line(distance*Math.cos(degToRad(angle)),distance*Math.sin(degToRad(angle)),1), {id: marqueId}); 
+                svg.use('#'+marqueId, {fill: "none", stroke: "none",transform:"translate("+transx+", "+transy+")"}); 
+            }
+            
+            function createTextPath(pointAx,pointAy,distance,angle,color, epaisseurTrait,texte,police,taille){
+                var marqueId = 'pathText'+pointAx;
+                createLinePath(pointAx+(distance/2)*Math.cos(degToRad(angle)),pointAy+(distance/2)*Math.sin(degToRad(angle)),distance,angle,"none", epaisseurTrait,marqueId);
+                var svg = $('#svgbasics').svg('get');
+                //creation de la marque
+                var text = svg.text(g,"", {id:"toto",fontFamily: police, fontSize: taille, fill: color, strokeWidth:epaisseurTrait,transform:"translate("+transx+", "+transy+")"}); 
+                var texts = svg.createText(); 
+                svg.textpath(text, '#'+marqueId, texts.string(texte)); 
+            }
+ 
+     
+            function drawOreilleVueAvant(orix,oriy,b,h,diamTete,color1,color2,strokeColor,hauteurBande,largeurBande,profondeurEncoche){
+                var ax = orix;
+                var ay = oriy;
+                var epaisseurBombe = -3;
+                var epaisseurTete = Math.abs(epaisseurBombe);
+                var decalagey = getHauteurCaps() - hauteurBande - largeurBande - epaisseurTete;
+                var decalagex = Math.tan(b) * decalagey; 
+                var svg = $('#svgbasics').svg('get');
+                var defs = svg.defs(); 
+                svg.linearGradient(defs, "Gradient", [["0%", color1,"100%"], ["100%", color2,"100%"]], ax, ay, ax+200, ay, {gradientUnits: "userSpaceOnUse"}); 
+                
+                var fillcolor = "url(#Gradient)";
+                var angle1 = 60;
+                var largeur1x = 2;
+                var largeur1y =0;
+                var largeur2x =  profondeurEncoche*Math.sin(degToRad(angle1));
+                var largeur2y =  profondeurEncoche*Math.cos(degToRad(angle1));
+                var largeur3x = 0;
+                var largeur3y = largeurBande - profondeurEncoche*(Math.sin(degToRad(angle1))+Math.cos(degToRad(angle1))) ;
+                var largeur4x = profondeurEncoche*Math.cos(degToRad(angle1));
+                var largeur4y = profondeurEncoche*Math.sin(degToRad(angle1));
+                var largeur5x = largeur1x+largeur2x+Math.tan(b)*largeurBande;
+                var largeur5y = 0;
+                
+                var strokeThin =0.1;
+                var mask = svg.group(g,"maskGroup",{fill:fillcolor , stroke: strokeColor, strokeWidth: strokeThin,transform:"translate("+transx+", "+transy+")"});  //transform:"scale("+zoomx+","+zoomy+")"
+                var pathMask = svg.createPath(); 
+                svg.path(mask,pathMask.move(ax+decalagex, ay-decalagey).line(-largeur1x,largeur1y,1).line(-largeur2x,-largeur2y,1).line(largeur3x,-largeur3y,1).line(largeur4x,-largeur4y,1).line(largeur5x,largeur5y,1).close());
+            }
+            
+            function drawOreilleVueArr(orix,oriy,b,h,diamTete,color1,color2,strokeColor,hauteurBande,largeurBande,profondeurEncoche){
+                var ax = orix;
+                var ay = oriy;
+                var epaisseurBombe = -3;
+                var epaisseurTete = Math.abs(epaisseurBombe);
+                //var epaisseurTete = 3;
+                var decalagey = getHauteurCaps() - hauteurBande - largeurBande - epaisseurTete;
+                var decalagex = getDiamBase() - Math.tan(b) * decalagey -1; 
+                var svg = $('#svgbasics').svg('get');
+                var defs = svg.defs(); 
+                svg.linearGradient(defs, "Gradient", [["0%", color1,"100%"], ["100%", color2,"100%"]], ax, ay, ax+200, ay, {gradientUnits: "userSpaceOnUse"}); 
+                
+                var fillcolor = color2;//url(#Gradient)";
+                var angle1 = 60;
+                var largeur1x = 2;
+                var largeur1y =0;
+                var largeur2x =  profondeurEncoche*Math.sin(degToRad(angle1));
+                var largeur2y =  profondeurEncoche*Math.cos(degToRad(angle1));
+                var largeur3x = 0;
+                var largeur3y = largeurBande - profondeurEncoche*(Math.sin(degToRad(angle1))+Math.cos(degToRad(angle1))) ;
+                var largeur4x = profondeurEncoche*Math.cos(degToRad(angle1));
+                var largeur4y = profondeurEncoche*Math.sin(degToRad(angle1));
+                var largeur5x = largeur1x+largeur2x+Math.tan(b)*largeurBande;
+                var largeur5y = 0;
+                
+                var strokeThin =0.1;
+                var mask = svg.group(g,"maskGroup",{fill:fillcolor , stroke: strokeColor, strokeWidth: strokeThin,transform:"translate("+transx+", "+transy+")"});  //transform:"scale("+zoomx+","+zoomy+")"
+                var pathMask = svg.createPath(); 
+                svg.path(mask,pathMask.move(ax+decalagex, ay-decalagey).line(largeur1x,largeur1y,1).line(largeur2x,-largeur2y,1).line(largeur3x,-largeur3y,1).line(-largeur4x,-largeur4y,1).line(-largeur5x,largeur5y,1).close());
+            }
+            //b : conicite de la capsule
+            function drawVueLiseret(orix,oriy,b,h,diamTete,color1,color2,strokeColor,distBord,epaisseurLiseret){
+                var ax = orix;
+                var ay = oriy;
+                var svg = $('#svgbasics').svg('get');
+	
+                var defs = svg.defs(); 
+                svg.linearGradient(defs, "Gradient", [[0, color1, 0], [1, color2, 1]], orix, oriy, orix+100, oriy, {gradientUnits: "userSpaceOnUse"}); 
+                var fillcolor = color1;//"url(#Gradient)";
+                
+                var l1x = getDiamBase()- (distBord)*(Math.tan(b));
+                var l1y = 0;
+                var l2x = Math.tan(b)*(epaisseurLiseret);
+                var l2y = epaisseurLiseret;
+                var l3x = getDiamBase()- (distBord+epaisseurLiseret)*(Math.tan(b));
+                var l3y = 0;
+                var l4x = Math.tan(b)*(epaisseurLiseret);
+                var l4y = epaisseurLiseret;
+                
+                var dx =  Math.tan(b)*(distBord);
+                var dxLiseret = Math.tan(b)*epaisseurLiseret;
+                var p1x = ax + dx;
+                var p1y = ay-(distBord);
+                var p2x = getDiamBase() - 2 * dx ;
+                var p2y = 0;
+                var p3x = -dxLiseret;
+                var p3y = -epaisseurLiseret;
+                var p4x = -(getDiamBase() - 2 * (dx + dxLiseret));
+                var p4y = 0;
+                var p5x = p1x;
+                var p5y = p1y;
+                var strokeThin =0.1;
+                var mask = svg.group(g,"maskGroup",{fill:fillcolor , stroke: strokeColor, strokeWidth: strokeThin,transform:"translate("+transx+", "+transy+")"});  //transform:"scale("+zoomx+","+zoomy+")"
+                var pathMask = svg.createPath(); 
+                svg.path(mask,pathMask.move(p1x, p1y).line(p2x,p2y,1).line(p3x,p3y,1).line(p4x,p4y,1).close());
+            }
+            
+
+            function drawDev(ax,ay,r,a,h1,bord_liseret,hauteurDuBord,color1,color2,strokeColor){
+                var svg = $('#svgbasics').svg('get');
+                var defs = svg.defs(); 
+                svg.linearGradient(defs, "Gradient", [["0%", color1,"100%"], ["100%", color2,"100%"]], ax, ay, ax, ay+3*h1/2, {gradientUnits: "userSpaceOnUse"}); 
+                var fillcolor = "url(#Gradient)";
+                var strokeThin =0.1;
+                var mask = svg.group(g,"maskGroup",{fill:fillcolor , stroke: strokeColor, strokeWidth: strokeThin,transform:"translate("+transx+", "+transy+")"});
+                var pathMask = svg.createPath(); 
+                var largeurBandeDechirement = 23;
+                var angleEncocheBande = 45;
+                var longueurEncocheBande = 4;
+                var hauteurBandeDechirement = 5;
+                var haut = ay+h1-bord_liseret - hauteurDuBord;
+                //svg.path(mask,pathMask.move(ax, haut).line(0,h1,1).curveQ(ps1x(r,a,hauteurDuBord), 0, calculG(r,a,hauteurDuBord),  - calculF(r,a,hauteurDuBord),1,0).line(-p2x(r,a,h1),-p2y(r,a,h1),1).curveQ( ax+ps1x(r,a,h1+hauteurDuBord),haut,ax,haut,0,0).line(0,0,1).close());	
+                
+                svg.path(mask,pathMask.move(ax, haut).line(0,hauteurBandeDechirement,1).line(longueurEncocheBande*Math.cos(degToRad(angleEncocheBande)),longueurEncocheBande*Math.sin(degToRad(angleEncocheBande)),1).line(-longueurEncocheBande*Math.cos(degToRad(angleEncocheBande)),longueurEncocheBande*Math.sin(degToRad(angleEncocheBande)),1).line(0,largeurBandeDechirement,1).line(longueurEncocheBande*Math.cos(degToRad(angleEncocheBande)),longueurEncocheBande*Math.sin(degToRad(angleEncocheBande)),1).line(-longueurEncocheBande*Math.cos(degToRad(angleEncocheBande)),longueurEncocheBande*Math.sin(degToRad(angleEncocheBande)),1).line(0,h1-largeurBandeDechirement-hauteurBandeDechirement-4*longueurEncocheBande*Math.sin(degToRad(angleEncocheBande)),1).curveQ(ps1x(r,a,hauteurDuBord), 0, calculG(r,a,hauteurDuBord),  - calculF(r,a,hauteurDuBord),1,0).line(-p2x(r,a,h1),-p2y(r,a,h1),1).curveQ( ax+ps1x(r,a,h1+hauteurDuBord),haut,ax,haut,0,0).line(0,0,1).close());	
+            }
+            
+            function drawTireteDev(r,h,angle_dev,ax,ay,color1,epaisseur,hauteurBandeTiret){
+                var svg = $('#svgbasics').svg('get');
+                var group = svg.group(g,"tireteDevGroup",{fill:'none' , stroke: color1, strokeWidth: epaisseur,transform:"translate("+transx+", "+transy+")"});
+                var pathMask = svg.createPath(); 
+	
+                var hauteurTiret = 2;
+                var beta = 45;
+                var largeurTiret = Math.sin(degToRad(beta));
+                var intersticeTiret = 1;
+                var nbrTirets = (r-h+hauteurBandeTiret)*angle_dev /(largeurTiret + intersticeTiret);
+                var alpha = angle_dev/nbrTirets;
+                var pasx ;
+                var pasy ;
+                var pasInclinaisonx ;
+                var pasInclinaisony ;
+                var dxTiret ;
+                var dyTiret ;
+          
+                var pathMask = svg.createPath();
+                var decalagex = 10;
+                var decalagey= hauteurBandeTiret;
+                for(var i= 2;i<nbrTirets;i++){
+                    pasx = calculG(r,alpha*(i),h-decalagey);
+                    pasy = calculF(r,alpha*(i),h-decalagey);
+                    dxTiret = hauteurTiret*Math.sin(beta);
+                    dyTiret = hauteurTiret*Math.cos(beta);
+                    svg.path(group,pathMask.move(ax + pasx ,ay+ decalagey -pasy).line(dxTiret,dyTiret,1).close());//.arc(rayonCannelure, rayonCannelure,180, false, false, dxCannelure, -dyCannelure,true).line(-pasInclinaisonx,-pasInclinaisony,1).arc(rayonCannelure, rayonCannelure,180, false, false, -dxCannelure, dyCannelure,true).close(),{id:"toto"+i});
+                }
+            }
+            
+            function drawTireteVue(r,h,conicite,ax,ay,color1,epaisseur,hauteurBandeTiret){
+                var svg = $('#svgbasics').svg('get');
+                var mask = svg.group(g,"maskGroup",{fill:'none' , stroke: color1, strokeWidth: epaisseur,transform:"translate("+transx+", "+transy+")"});
+                var pathMask = svg.createPath(); 
+	
+                var hauteurTiret = 2;
+                var beta = 45;
+                var largeurTiret = Math.sin(degToRad(beta));
+                var intersticeTiret = 1;
+                var rCone = getDiamTete()/(2*Math.sin(degToRad(conicite)));
+                var nbrTirets = (rCone+hauteurBandeTiret)*2*Math.tan(degToRad(conicite)) /(largeurTiret + intersticeTiret);
+                
+                //var alpha = conicite/nbrTirets;
+                var pasx ;
+                var pasy ;
+                //var pasInclinaisonx ;
+                //var pasInclinaisony ;
+                var dxTiret ;
+                var dyTiret ;
+          
+                var pathMask = svg.createPath();
+                var decalagex = 10;
+                var decalagey= hauteurBandeTiret;
+                ax = ax + (getHauteurCaps()-hauteurBandeTiret)*Math.tan(degToRad(conicite));// (rCone+decalagey)*Math.sin(degToRad(conicite)) - getDiamTete()/2;
+                for(var i= 0;i<nbrTirets-2;i++){
+                    pasx = i*(largeurTiret + intersticeTiret);
+                    pasy = 0;//calculF(r,alpha*(i),h-decalagey);
+                    dxTiret = hauteurTiret*Math.sin(beta);
+                    dyTiret = hauteurTiret*Math.cos(beta);
+                    //alert(radToDeg(alpha));
+                    svg.path(mask,pathMask.move(ax + pasx ,ay+ decalagey -pasy).line(dxTiret,dyTiret,1).close());//.arc(rayonCannelure, rayonCannelure,180, false, false, dxCannelure, -dyCannelure,true).line(-pasInclinaisonx,-pasInclinaisony,1).arc(rayonCannelure, rayonCannelure,180, false, false, -dxCannelure, dyCannelure,true).close(),{id:"toto"+i});
+                }
+            }
+            
+            function drawCannelureVue(r,h,conicite,ax,ay,color1,epaisseur,hauteurBandeCannelure){
+                var svg = $('#svgbasics').svg('get');
+                var mask = svg.group(g,"maskGroup",{fill:'none' , stroke: color1, strokeWidth: epaisseur,transform:"translate("+transx+", "+transy+")"});
+                var pathMask = svg.createPath(); 
+	
+                var hauteurCannelure = 25;
+                var largeurCannelure = 3;
+                var intersticeCannelure = 2;
+                var rCone = getDiamTete()/(2*Math.sin(degToRad(conicite)));
+                var nbrCannelures =(rCone+hauteurBandeCannelure-2)*2*Math.tan(degToRad(conicite)) /(largeurCannelure + intersticeCannelure);
+                //var nbrCannelures = degToRad(2*conicite)*(rCone) /(largeurCannelure + intersticeCannelure);
+                var alpha = degToRad(2*conicite/nbrCannelures);
+                var pasx ;
+                var pasy ;
+                var pasInclinaisonx ;
+                var pasInclinaisony ;
+                var dxCannelure ;
+                var dyCannelure ;
+                var rayonCannelure = largeurCannelure/2;
+                ax = ax + (getHauteurCaps()-hauteurBandeCannelure)*Math.tan(degToRad(conicite)); //(rCone+hauteurBandeCannelure+0.5*hauteurCannelure)*Math.sin(degToRad(conicite)) - getDiamTete()/2;
+                
+                var pathMask = svg.createPath();
+                for(var i= 0;i<nbrCannelures;i++){
+                    pasx = i*(largeurCannelure + intersticeCannelure);//(rCone+hauteurBandeCannelure+0.5*hauteurCannelure)*Math.sin(alpha*i);
+                    pasy = 0;
+                    pasInclinaisonx = 0;//hauteurCannelure*Math.sin(alpha*i);
+                    pasInclinaisony = hauteurCannelure;//*Math.cos(alpha*i);
+                    dxCannelure = largeurCannelure;//*Math.cos(alpha*i);
+                    dyCannelure = 0;//largeurCannelure*Math.sin(alpha*i);
+                    svg.path(mask,pathMask.move(ax + pasx ,ay+ hauteurBandeCannelure -pasy).line(pasInclinaisonx,pasInclinaisony,1).arc(rayonCannelure, rayonCannelure,180, false, false, dxCannelure, -dyCannelure,true).line(-pasInclinaisonx,-pasInclinaisony,1).arc(rayonCannelure, rayonCannelure,180, false, false, -dxCannelure, dyCannelure,true).close(),{id:"toto"+i});
+                    //svg.path(mask,pathMask.move(ax + pasx ,ay+ hauteurBandeCannelure -pasy).line(pasInclinaisonx,pasInclinaisony,1).arc(rayonCannelure, rayonCannelure,180, false, false, dxCannelure, -dyCannelure,true).line(-pasInclinaisonx,-pasInclinaisony,1).arc(rayonCannelure, rayonCannelure,180, false, false, -dxCannelure, dyCannelure,true).close(),{id:"toto"+i});
+                }    
+            }
+            
+            
+            function drawCannelureDev(r,h,angle_dev,ax,ay,color1,epaisseur,hauteurBandeCannelure){
+                var svg = $('#svgbasics').svg('get');
+                var group = svg.group(g,"canneDevGroup",{fill:'none' , stroke: color1, strokeWidth: epaisseur,transform:"translate("+transx+", "+transy+")"});
+                var pathMask = svg.createPath(); 
+	
+                var hauteurCannelure = 25;
+                var largeurCannelure = 3;
+                var intersticeCannelure = 2;
+                var nbrCannelures = (r-h)*angle_dev /(largeurCannelure + intersticeCannelure);
+                var alpha = angle_dev/nbrCannelures;
+                var pasx = calculG(r,alpha,h);
+                var pasy = 0;
+                var pasInclinaisonx ;
+                var pasInclinaisony ;
+                var dxCannelure ;
+                var dyCannelure ;
+                var rayonCannelure = largeurCannelure/2;
+                var pathMask = svg.createPath();
+                for(var i= 1;i<nbrCannelures;i++){
+                    pasx = calculG(r,alpha*(i),h-hauteurBandeCannelure);
+                    pasy = calculF(r,alpha*(i),h);
+                    pasInclinaisonx = hauteurCannelure*Math.sin(alpha*i);
+                    pasInclinaisony = hauteurCannelure*Math.cos(alpha*i);
+                    dxCannelure = largeurCannelure*Math.cos(alpha*i);
+                    dyCannelure = largeurCannelure*Math.sin(alpha*i);
+                    svg.path(group,pathMask.move(ax + pasx ,ay+ hauteurBandeCannelure -pasy).line(pasInclinaisonx,pasInclinaisony,1).arc(rayonCannelure, rayonCannelure,180, false, false, dxCannelure, -dyCannelure,true).line(-pasInclinaisonx,-pasInclinaisony,1).arc(rayonCannelure, rayonCannelure,180, false, false, -dxCannelure, dyCannelure,true).close(),{id:"toto"+i});
+               }
+            }
+            
+            function drawLiseret(ax,ay,r,a,h1,strokeThin,hauteurBord,couleurLiseret1,couleurLiseret2,strokeLiseret){
+                var largeurLiseret =0;
+                var hauteurDuBord = hauteurBord;
+                var fillcolor = couleurLiseret1;//"url(#Gradient)";
+                //var strokeThin =0;
+                var svg = $('#svgbasics').svg('get');
+                var mask = svg.group(g,"maskGroup",{/*fill:fillcolor ,*/ stroke: couleurLiseret1, strokeWidth: strokeThin,transform:"translate("+transx+", "+transy+")"});  //transform:"scale("+zoomx+","+zoomy+")"
+                var pathMask = svg.createPath(); 
+	
+                var haut = ay+h1-largeurLiseret - hauteurDuBord;
+                svg.path(mask,pathMask.move(ax, haut).line(0,largeurLiseret,1).curveQ(ps1x(r,a,hauteurDuBord), 0, calculG(r,a,hauteurDuBord),  - calculF(r,a,hauteurDuBord),1,0).line(-p2x(r,a,largeurLiseret),-p2y(r,a,largeurLiseret),1).curveQ( ax+ps1x(r,a,largeurLiseret+hauteurDuBord),haut,ax,haut,0,0).line(0,0,1).close());	
+            }
+
+            
+            function createMarquexy(cote,distBord,texte,police,couleur,taille,epaisseurTrait,ax,ay,bAxeSym){
+                var diamBase = getDiamBase();
+                var axeSymId = 'pathAxeSymAv'+cote;
+		var svg = $('#svgbasics').svg('get');
+                var defs = svg.defs(); 
+                
+                if(bAxeSym == true ){
+                    //creation de l'axe
+                    var groupMarque = svg.group(g,axeSymId,{fill: "none", stroke: "red", strokeWidth:"0.5",transform:"translate("+transx+", "+transy+")"});
+                    var pathAxeSym = svg.createPath();
+                    svg.path(groupMarque, pathAxeSym.move(ax+diamBase/2,ay-(-100)).line(ax+diamBase/2, ay - getHauteurDev() - 100), {id: axeSymId}); 
+                }
+                //creation du chemin de texte
+                var fontSizeVert = 4*taille/7;
+                var marqueId = 'pathVueVert'+cote;
+                var path = svg.createPath(); 
+                svg.path(defs, path.move(ax+(diamBase/2)+fontSizeVert/2,ay - distBord).line(ax+(diamBase/2)+fontSizeVert/2, ay- distBord -100), {id: marqueId}); 
+                svg.use('#'+marqueId, {fill: "none", stroke: "none",transform:"translate("+transx+", "+transy+")"}); 
+                
+                //creation de la marque
+                var text = svg.text(g,"", {fontFamily: police, fontSize: taille, fill: couleur, strokeWidth:epaisseurTrait,transform:"translate("+transx+", "+transy+")"}); 
+                var texts = svg.createText(); 
+                svg.textpath(text, '#'+marqueId, texts.string(texte)); 
+            }
+            
+            function createMarque(cote,distBord,texte,police,couleur,taille,epaisseurTrait,a,r,ax,ay,fx,fy,bAxeSym){
+                var h = getHauteurDev();
+                var marqueId = 'pathChannel'+cote;
+                var alpha = (4-cote)*(a)/4;
+                var ex = ax + calculG(r+100,alpha,distBord);
+                var ey = ay + 100 + h - distBord  - calculF(r+100,alpha,distBord );
+                
+                var axeSymId = 'pathAxeSym'+cote;
+		var svg = $('#svgbasics').svg('get');
+                if(bAxeSym == true ){
+                    var groupMarque = svg.group(g,axeSymId,{fill: "none", stroke: "red", strokeWidth:"0.5",transform:"translate("+transx+", "+transy+")"});
+                    var pathAxeSym = svg.createPath();
+                    svg.path(groupMarque, pathAxeSym.move(ex,ey).line(fx, fy), {id: axeSymId}); 
+                }
+                
+                var fontSizeVert = 4*taille/7;
+                var ex = ax + calculG(r,alpha,distBord);
+                var ey = ay + h - distBord - calculF(r,alpha,distBord);
+                
+                //var groupText = svg.group(g,"tt",{fill: "blue", stroke: "blue",strokeWidth:epaisseurTrait,transform:"translate("+transx+", "+transy+")"});
+                var defs = svg.defs(); 
+                var path = svg.createPath(); 
+                svg.path(defs, path.move(ex+fontSizeVert/2,ey).line(fx+fontSizeVert/2, fy), {id: marqueId}); 
+                svg.use('#'+marqueId, {fill: "none", stroke: "none",transform:"translate("+transx+", "+transy+")"}); 
+                
+                var text = svg.text(g,"", {fontFamily: police, fontSize: taille, fill: couleur, strokeWidth:epaisseurTrait,transform:"translate("+transx+", "+transy+")"}); 
+                var texts = svg.createText(); 
+                svg.textpath(text, '#'+marqueId, texts.string(texte)); 
+            }
+            
+            function xcoord(cote,distBord,texte,police,couleur,taille,epaisseurTrait,a,r,ax,ay,fx,fy){
+                var alpha = (4-cote)*(a)/4;
+                var ex = ax + calculG(r,alpha,distBord);
+                return ex;
+                
+            }
+            function ycoord(cote,distBord,texte,police,couleur,taille,epaisseurTrait,a,r,ax,ay,fx,fy){
+                var alpha = (4-cote)*(a)/4;
+                var h = getHauteurDev();
+                var ey = ay + h - distBord - calculF(r,alpha,distBord);
+                return ey;
+            }
+            
+            
+	
+            function phs1x(r,a,h){
+                var phs1x = 	(r-h)*(2*Math.sin(a/2)*Math.cos(a/2)-Math.tan(a/2));
+                return phs1x;
+            }
+
+
+            function ps1x(r,a,h){
+                var ps1x = 	(r-h)*Math.tan(a/2);
+                return ps1x;
+            }
+
+            function p2x(r,a,h){
+                var p2x = 	(h*Math.sin(a));
+                return p2x;
+            }
+
+            function p2y(r,a,h){
+                var p2y = 	(h*Math.cos(a));
+                return p2y;
+            }
+
+            function calculF(r,a,h){
+                var f1 = 2*(r-h)*Math.sin(a/2)*Math.sin(a/2);
+                return f1;
+            }
+
+            function calculG(r,a,h){
+                var g1 = 2*(r-h)*Math.cos(a/2)*Math.sin(a/2);
+                return g1;
+            }
+
+	
+            function confirmation() {
+                var x = window.confirm("Ce formulaire est envoyé à  " + document.frmOne.action);
+                return x;
+            }
+
+            function random(range) {
+                return Math.floor(Math.random() * range);
+            }
+
+            function controle(frmOne) {
+                var test = document.frmOne.input.value;
+                alert("Vous avez tapé : " + test);
+                drawcaps();
+            }
+
+            function getFonts()
+            {
+                var nFontLen = dlgHelper.fonts.count;
+                var rgFonts = new Array();
+                for ( var i = 1; i < nFontLen + 1; i++ )
+                    rgFonts[i] = dlgHelper.fonts(i); 
+
+                rgFonts.sort();
+                for ( var j = 0; j < nFontLen; j++ ){
+                    alert(rgFonts[j]);
+                }
+            }
+
+
+
+            function displaywheel(e){
+                var evt=window.event || e //equalize event object
+                var delta=evt.detail? evt.detail*-1 : evt.wheelDelta //check for detail first so Opera uses that instead of wheelDelta
+                //zoomx = zoomx - 50*delta;
+                //zoomy = zoomy - 50*delta;
+                zoomw = zoomw - (-50*delta);
+                zoomh = zoomh - (-50*delta);
+                ratioZoom = zoomw/842;
+                //document.getElementById("wheelvalue").innerHTML=ratioZoom 
+                drawcaps();
+	
+            }
+            
+            
+            function displayLogo(ax,ay,color,index,scaleValue,widthStroke,urlFile,angleDev,bCenter){
+                var svg = $('#svgbasics').svg('get');
+                    if(tabLogo[index]!=""){
+                        
+                        $.get(urlFile, null, function(data) {
+                        tabLogo[index] = data.documentElement;
+                        var w = tabLogo[index].getAttributeNS(null, 'width');
+                        var h = tabLogo[index].getAttributeNS(null, 'height');
+                        console.log("width ="+w*scaleValue);
+                        console.log("height ="+h*scaleValue); 
+                        var posx;
+                        var posy;
+                        if(bCenter==1){
+                            posx = ax-(w*scaleValue/2) + getDiamBase()/2;
+                            posy = ay-(h*scaleValue);
+                        }else{
+                            posx = ax;
+                            posy = ay-(h*scaleValue);
+                        }
+                        
+                        var group = svg.group(g,"logo"+index,{fill:color , stroke: color, strokeWidth: widthStroke,transform:"translate("+posx+", "+posy+") translate("+translogox+", "+translogoy+") scale("+scaleValue+") rotate("+(-angleDev)+" "+ax+" "+ay+")"});
+                        svg.add(group,tabLogo[index],{id:"logo"+index});
+                    }, 'xml');
+                    }
+                                    
+                    $("#logo"+index, svg.root()).bind('click', svgClicked). bind('mouseover', svgOver).bind('mouseout', svgOut); 
+            }
+            
+            function displayLogoDev(ax,ay,distanceBord,index,scaleValue,urlFile,angleDev,fx,fy){
+                var svg = $('#svgbasics').svg('get');
+                    if(tabLogo[index]!=""){
+                        $.get(urlFile, null, function(data) {
+                        tabLogo[index] = data.documentElement;
+                        var w = tabLogo[index].getAttributeNS(null, 'width');
+                        var height = tabLogo[index].getAttributeNS(null, 'height');
+                        var posx = ax-(w*scaleValue/2) ;
+                        var posy = ay-(height*scaleValue);
+                        
+                        var group = svg.group(g,"logo"+index,{fill:'none' , stroke: 'black', strokeWidth: '0',transform:" translate("+translogox+", "+translogoy+") rotate("+(-angleDev)+" "+fx+" "+fy+") translate("+posx+", "+posy+") scale("+scaleValue+")" });//rotate("+(-angleDev)+" "+ax+" "+ay+")scale("+scaleValue+")
+                        svg.add(group,tabLogo[index],{id:"logo"+index});
+                    }, 'xml');
+                    }
+                                    
+                    $("#logo"+index, svg.root()).bind('click', svgClicked). bind('mouseover', svgOver).bind('mouseout', svgOut); 
+            }
+var myMapApp;
+var svgRoot;
+            function createCombo(){
+                //first a few styling parameters:
+                var comboBoxCellHeight = 16;
+                var comboBoxTextpadding = 3;
+                var comboBoxtextStyles = {"font-family":"Arial,Helvetica","font-size":11,"fill":"dimgray"};
+                var comboBoxStyles = {"stroke":"dimgray","stroke-width":1,"fill":"white"};
+                var comboBoxScrollbarStyles = {"stroke":"dimgray","stroke-width":1,"fill":"whitesmoke"};
+                var comboBoxSmallrectStyles = {"stroke":"dimgray","stroke-width":1,"fill":"lightgray"};
+                var comboBoxHighlightStyles = {"fill":"dimgray","fill-opacity":0.3};
+                var comboBoxTriangleStyles = {"fill":"dimgray"};
+                var gmenu = $('#svgmenu').svg('get').group({id: 'menuGroup'});
+                //this array contains the values
+                var roses = new Array({key:"Butterscotch",value:false},{key:"Ci Peace",value:false},{key:"Impatient",value:false},{key:"Lady Hillingdon",value:false},{key:"Lavaglut",value:false},{key:"Mission Bells",value:false},{key:"Sexy Rexy",value:false},{key:"Souvenir de Pierre Notting",value:false},{key:"Sunflare",value:false},{key:"Whisky Mac",value:false},{key:"Whisper Floribunda",value:false});
+                //now the initialization of the combobox
+                var comboRoses = new combobox("combo1",gmenu,roses,170,0,-100,comboBoxCellHeight,comboBoxTextpadding,5,true,50,comboBoxtextStyles,comboBoxStyles,comboBoxScrollbarStyles,comboBoxSmallrectStyles,comboBoxHighlightStyles,comboBoxTriangleStyles,showRoses);
+                //return comboRoses;
+        }
+            
+        function showRoses(comboboxName,selectedValues,selectedIndizes) {
+            var rosesString = selectedValues.join(",");
+            if (rosesString.length == 0) {
+                    rosesString = " ";
+            }
+            document.getElementById("selectedValue").firstChild.nodeValue = rosesString;
+        }
+
+            
+            function loadFile(urlFile){
+                $.get(urlFile, null, function(data) {
+                        tabLogo[0] = data.documentElement;
+                        //svg.add(group,tabLogo[0]);
+                    }, 'xml');
+            }
+            
+         
+            function svgClicked() { 
+                selectedItem = "#"+this.id;
+                document.getElementById("itemSelected").innerHTML=selectedItem 
+                //alert('This is a ' + this.id + ' ' + this.nodeName); // $(this).id
+            } 
+ 
+            function svgOver() { 
+                $(this).attr('stroke', 'lime'); 
+            } 
+
+            function svgOut() { 
+                $(this).attr('stroke', 'black'); 
+            }
+
+            function loadExtSvg() { 
+                var svg = $('#svgbasics').svg('get'); 
+                var img = svg.image(100, 50, 200, 200, "img/uluru.jpg"); 
+                svg.title(img, "My image"); 
+                svg.image(130, 100, 20, 20, "img/sun.png"); 
+                /*
+                var svg = $('#svgbasics').svg('get'); 
+                svg.load($('#loadURL').val(), {changeSize: false, onLoad: loadDone}); 
+                resetSize(svg); */
+            }
+ 
+            // Callback after loading external document 
+            function loadDone(svg, error) { 
+                svg.text(10, 20, error || 'Loaded into ' + this.id); 
+            }
+            var step = 10;
+            function left(){
+                var svg = $('#svgbasics').svg('get');
+                zoomx = zoomx + step/ratioZoom;
+                svg.configure({viewBox: zoomx+' '+zoomy+' '+zoomw+' '+zoomh})
+                updateViewCookie()
+            }
+            function right(){
+                var svg = $('#svgbasics').svg('get');
+                zoomx = zoomx - step/ratioZoom;
+                svg.configure({viewBox: zoomx+' '+zoomy+' '+zoomw+' '+zoomh})
+                updateViewCookie()
+            }
+            function down(){
+                var svg = $('#svgbasics').svg('get');
+                zoomy = zoomy  - step/ratioZoom;
+                svg.configure({viewBox: zoomx+' '+zoomy+' '+zoomw+' '+zoomh})
+                updateViewCookie()
+            }
+            
+            function up(){
+                var svg = $('#svgbasics').svg('get');
+                zoomy = zoomy  + step/ratioZoom;
+                svg.configure({viewBox: zoomx+' '+zoomy+' '+zoomw+' '+zoomh})
+                updateViewCookie()
+            }
+            
+            function zoommoins(){
+                var svg = $('#svgbasics').svg('get');
+                zoomw = zoomw  + step/ratioZoom;
+                zoomh = zoomh  + step/ratioZoom;
+                svg.configure({viewBox: zoomx+' '+zoomy+' '+zoomw+' '+zoomh})
+                updateViewCookie()
+            }
+            
+            function zoomplus(){
+                var svg = $('#svgbasics').svg('get');
+                zoomw = zoomw  - step/ratioZoom;
+                zoomh = zoomh  - step/ratioZoom;
+                svg.configure({viewBox: zoomx+' '+zoomy+' '+zoomw+' '+zoomh})
+                updateViewCookie()
+            }
+            
+
+        </script>
+    </head>
+    <body>
+       <div id="page_container">
+            <div id="header">
+                <h1>Capsule Designer</h1>
+            
+            <div id="geometry">
+                        <INPUT TYPE=button id ="refreshBtn" SIZE=20 VALUE="refresh" onClick="drawcaps()">
+                        <select id="typeCombo" onChange="doNothing()">
+                        </select> 
+                        &nbsp; &nbsp;&nbsp;
+                        <input type="button" id="addBtn" SIZE = 10 value ="add"  onClick="addRow('myTable')">
+                        
+                        <button type="button" id="left" onClick=left()>left</button>
+                        <button type="button" id="down" onClick=down()>down</button>
+                        <button type="button" id="up" onClick=up()>up</button>
+                        <button type="button" id="right" onClick=right()>right</button>
+                        <button type="button" id="zoommoins" onClick=zoommoins()>zoom moins</button>
+                        <button type="button" id="zoomplus" onClick=zoomplus()>zoom plus</button>
+                        &nbsp; &nbsp;&nbsp;
+                        <button id="export" onClick="exportSvg()">Export</button>
+            </div></div>
+            <div id="left_column"></div>
+            <div id="svgrow">
+                <div id="svgbasics"></div>
+                <!--<div id="svgmenu"></div>-->
+            </div>
+            <div id ="right_column"></div>
+            
+            <div id="footer"></div>
+            
+            <div id="log" style="display:none;">
+                <input type="text" name="txtarea" />
+            </div>
+            
+            <div id="msg"></div>
+            
+        </div>
+    </body>
+</html>

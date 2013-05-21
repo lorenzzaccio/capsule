@@ -120,6 +120,19 @@ function syncM2S(arrow){
                    }
                  });
 }
+
+function writePhpFile(){        
+        var req = "";//{ 'tab[]' : arrow , type : 'sync'};
+        $.ajax({
+                   type: "POST",
+                   url: "writeFile.php",
+                   data: req ,
+                   success: function(x){
+                     $('#resultat').html(x);
+                   }
+                 });
+}
+
 function syncS2MPhp2(){
     	var ajaxRequest;  // The variable that makes Ajax possible!
 	

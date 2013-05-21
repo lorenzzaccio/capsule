@@ -15,8 +15,11 @@
         <script type="text/javascript" src="lib/guiCbk.js"></script>
         <script type="text/javascript" src="lib/util.js"></script>
         <script type="text/javascript" src="lib/graphic.js"></script>
-        <script type="text/javascript" src="lib/cookie.js"></script>
+        <!--<script type="text/javascript" src="lib/cookie.js"></script>-->
+        <script type="text/javascript" src="lib/cookie_caps.js"></script>
+        <script type="text/javascript" src="lib/cookie_view.js"></script>
         <script type="text/javascript" src="lib/table.js"></script>
+        <script type="text/javascript" src="lib/tableCapsule.js"></script>
         <script type="text/javascript" src="lib/forme.js"></script>
         <script type="text/javascript" src="lib/sql.js"></script>
         <script type="text/javascript" src="lib/storage/stock.js"></script>
@@ -50,6 +53,33 @@
             var $dialog;
             var screenW = "800px";
             var screenH = "640px";
+            var tableHeader = [];
+            
+            
+            var dx = 0;
+            var dy = 0;
+            var decalageVueAvantx = 200;
+            var decalageVueAvanty = 0;
+            var decalageVueArrx = 300;
+            var decalageVueArry = 0;
+            var decalageDevCannelurex = 0;
+            var decalageDevCannelurey = 0;
+            
+            var conicite = 0;
+            var fonts = [];
+            var defaultValue = [];
+            var selectedItem;
+            
+            //variables ouverture facile dev
+            var hauteurDuBord = 0;
+            var bord_liseret = 0;
+            var hauteurBandeCannelure = 6;
+            var poshauteurBandeTirete = 7;
+            var epaisseurTete = 2;
+            var largeurBandeTirete = 30;
+            var profondeurEncoche = 4;
+            var maxIndex = 0;
+            
             //var objStock = new stock();
 
             $(function(){
@@ -68,9 +98,165 @@
                 initViewport();
                 load_combo_type();
                 //ajout du tableau de donnée locales
+                /*
                 var tableHeader = loadHeaderCapsule();
                 createHeader("footer","myTable",tableHeader);
+                */
+                var tableHeader = loadHeader();
+                createHeader("footer","myTable",tableHeader);
+                //$("#myTable").tablesorter({widthFixed: true, widgets: ['zebra']});
+                //initEvent();
+                readCookie_caps();
+                maxIndex = getMaxIndex("myTable");
+                
             }
+            
+            
+            function addRow(tableId){
+                var add = 0;
+                var arrow = new Array(COL_NUMBER);
+                var type = trim(document.getElementById('typeProduitCombo').value);
+                var defaultValue = loadDefaultValue(type);
+                
+                if(type == "vueDev"){
+                    add = 1;
+                    var texte=	defaultValue[1];//trim(document.checkForm.text.value);
+                    var font = defaultValue[2];//document.getElementById('fontCombo').value;
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = defaultValue[4];//document.getElementById('tailleCombo').value;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = defaultValue[6];//document.checkForm.cote.value;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = defaultValue[9];//"";
+                    var ordre = defaultValue[10];
+                }
+                
+                if(type == "vueAvant"){
+                    add = 1;
+                    var texte=	defaultValue[1];//trim(document.checkForm.text.value);
+                    var font = defaultValue[2];//document.getElementById('fontCombo').value;
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = defaultValue[4];//document.getElementById('tailleCombo').value;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = defaultValue[6];//document.checkForm.cote.value;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = defaultValue[9];//"";
+                    var ordre = defaultValue[10];
+                }
+                
+                if(type == "vueArriere"){
+                    add = 1;
+                    var texte=	defaultValue[1];//trim(document.checkForm.text.value);
+                    var font = defaultValue[2];//document.getElementById('fontCombo').value;
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = defaultValue[4];//document.getElementById('tailleCombo').value;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = defaultValue[6];//document.checkForm.cote.value;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = defaultValue[9];//"";
+                    var ordre = defaultValue[10];
+                }
+                
+                
+                if(type == "texte"){
+                    add = 1;
+                    var texte=	defaultValue[1];//trim(document.checkForm.text.value);
+                    var font = defaultValue[2];//document.getElementById('fontCombo').value;
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = defaultValue[4];//document.getElementById('tailleCombo').value;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = defaultValue[6];//document.checkForm.cote.value;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = defaultValue[9];//"";
+                    var ordre = defaultValue[10];
+                }
+	
+                if(type == "liseret"){
+                    add = 1;
+                    var texte = "";
+                    var font = "";
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = 0;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = 0;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = "";
+                    var ordre = defaultValue[10];
+                }
+	
+                if(type == "logo"){
+                    add = 1;
+                    var texte = defaultValue[1];//index
+                    var font = defaultValue[2];//posx
+                    var couleur = defaultValue[3];//posy
+                    var sizeFont = defaultValue[4];//scale
+                    var distanceBord = defaultValue[5];
+                    var cote = defaultValue[6];
+                    var widthStroke = defaultValue[7];
+                    var typeImpression = defaultValue[8];
+                    var linkFile = defaultValue[9];
+                    var ordre = defaultValue[10];
+                }
+                
+                if(type == "cotation"){
+                    add = 1;
+                    var texte=	defaultValue[1];//trim(document.checkForm.text.value);
+                    var font = defaultValue[2];//document.getElementById('fontCombo').value;
+                    var couleur = defaultValue[3];//document.checkForm.color.value;
+                    var sizeFont = defaultValue[4];//document.getElementById('tailleCombo').value;
+                    var distanceBord = defaultValue[5];//document.getElementById("distBord").value;
+                    var cote = defaultValue[6];//document.checkForm.cote.value;
+                    var widthStroke = defaultValue[7];//document.checkForm.widthStroke.value;
+                    var typeImpression = defaultValue[8];//document.checkForm.typeImp.value;
+                    var linkFile = defaultValue[9];//"";
+                    var ordre = defaultValue[10];
+                }
+                
+                if(type == "cartouche"){
+                    add = 1;
+                    var texte = defaultValue[1];//index
+                    var font = defaultValue[2];//posx
+                    var couleur = defaultValue[3];//posy
+                    var sizeFont = defaultValue[4];//scale
+                    var distanceBord = defaultValue[5];
+                    var cote = defaultValue[6];
+                    var widthStroke = defaultValue[7];
+                    var typeImpression = defaultValue[8];
+                    var linkFile = defaultValue[9];
+                    var ordre = defaultValue[10];
+                }
+                
+                if(add ==1){
+                    arrow[0] = 0; //btn
+                    arrow[1] = type;
+                    arrow[2] = texte;
+                    arrow[3] = font;
+                    arrow[4] = couleur;
+                    arrow[5] = sizeFont;
+                    arrow[6] = distanceBord;
+                    arrow[7] = cote;
+                    arrow[8] = widthStroke;
+                    arrow[9] = typeImpression;
+                    arrow[10] = linkFile;
+                    arrow[11] = ordre;
+                    
+                    insertRow(arrow,tableId);
+                    var nbrRow = document.getElementById(tableId).rows.length ;
+                    maxIndex = getMaxIndex("myTable",INDEX_HEADER) - (-1);
+                    setCookie("username"+maxIndex,arrow,5);
+                    drawcaps();
+                }
+                
+                //insertRow(arrow,tableId);
+                //setCookie("username"+window.indexRow,arrow,5);
+                //indexRow ++;
+            }
+            
             
             function initViewport(){
                 var mydiv = document.getElementById("svgbasics");
@@ -392,12 +578,12 @@
                     wnd2.style.display = "block";
             }
             function toggle2(showHideDiv) {
-                var ele = document.getElementById(showHideDiv);
+                //var ele = document.getElementById(showHideDiv);
                 var wnd = document.getElementById("testWind");
                 wnd.style.left = posx+ 'px';
                 wnd.style.top = posy+ 'px';
                 //var text = document.getElementById(switchTextDiv);
-                if(ele.style.display == "block") {
+                if(wnd.style.display == "block") {
                     wnd.style.display = "none";
                 }
                 else {
@@ -462,11 +648,11 @@
             
             function load_combo_type(){
                 var typeOptions = [];	
-                typeOptions[0] = "vue_dev";
-                typeOptions[1] = "vue_avant";
-                typeOptions[2] = "vue_arriere";
-                typeOptions[3] = "vude_cote_droit";
-                typeOptions[4] = "vue_cote_gauche";
+                typeOptions[0] = "vueDev";
+                typeOptions[1] = "vueAvant";
+                typeOptions[2] = "vueArriere";
+                typeOptions[3] = "vueCoteDroit";
+                typeOptions[4] = "vueCoteGauche";
                 typeOptions[5] = "texte";
                 typeOptions[6] = "liseret";
                 typeOptions[7] = "logo";
@@ -791,14 +977,18 @@
 
         <!-- BAR DE MENU HORIZONTALE HAUT - IMMOBILE - CACHABLE --->
         <div id="floating_bar" class="menuBar" style="display: block;">
+            
             <div id="menu_produit">
                 <div id="descrip_palette" class="desc" style="display: block;">
                     <INPUT TYPE=text id ="textePalette" style="width:200px;height:40px" VALUE="desc palette" >
                     <INPUT TYPE=text id ="nbrCarton" style="width:60px;height:40px" VALUE="12" >
                     <INPUT TYPE=button id ="descBtn" style="width:auto;height:50px" VALUE="OK" onClick="setDesc()">
                     <select id="typeProduitCombo" onchange=""></select>
-                    <INPUT TYPE=button id ="addBtn" style="width:auto;height:50px" VALUE="ajouter palette" onClick="addProductBtn()">
+                    <!--<INPUT TYPE=button id ="addBtn" style="width:auto;height:50px" VALUE="ajouter palette" onClick="addProductBtn()">-->
+                    <INPUT TYPE=button id="addBtn" style="width:auto;height:50px" VALUE ="add"  onClick="addRow('myTable')">
                     <INPUT TYPE=button id ="rotate" style="width:auto;height:50px" VALUE="rotation" onClick="rotate()">
+                    
+                    
 
                 </div>
                 <div id="descrip_carton" class="desc" style="display: none;">
@@ -807,8 +997,10 @@
                     <INPUT TYPE=text id ="article" style="width:60px;height:40px" VALUE="02000127" >
                     <INPUT TYPE=text id ="nbrCoiffes" style="width:60px;height:40px" VALUE="2500" >
                     <INPUT TYPE=button id ="descBtn" style="width:auto;height:50px" VALUE="OK" onClick="setDesc()">
-                    <INPUT TYPE=button id ="addBtn" style="width:auto;height:50px" VALUE="ajouter palette" onClick="addProductBtn()">
+                    <INPUT TYPE=button id ="addBtnPal" style="width:auto;height:50px" VALUE="ajouter palette" onClick="addProductBtn()">
+                    <INPUT TYPE=button id="addBtn" style="width:auto;height:50px" VALUE ="add"  onClick="addRow('myTable')">
                     <INPUT TYPE=button id ="rotate" style="width:auto;height:50px" VALUE="rotation" onClick="rotate()">
+                    
                 </div>
             </div>
         </div>
@@ -824,6 +1016,7 @@
         <!-- BAR DE MENU HORIZONTALE BAS DE PAGE - IMMOBILE - SUPPRIMABLE -->
         <div id="floating_bar_bottom" class="footerBar" style="display: block;">
             <div id="header"><h1>Caps Designer</h1></div>
+            
             <div id="titleText" style="display: block;"></div>
             <div id="right_column">
                 <div id="floating_menu" style="display: block;">
@@ -833,6 +1026,7 @@
                     <INPUT TYPE=button id ="vuePalette" style="width:auto;height:50px" VALUE="vue palette" onClick="vuePaletteBtnPressed()" disabled>
                     <INPUT TYPE=button id ="vueCarton" style="width:auto;height:50px" VALUE="vue carton" onClick="vueCartonBtnPressed()" disabled>
                     <INPUT TYPE=text id ="verb4" style="width:50px;height:30px" VALUE="id" >
+                    
                 </div> 
             </div>
         </div>
@@ -845,12 +1039,14 @@
             <INPUT TYPE=button id ="syncM2S" style="width:100px;height:40px" VALUE="sync M2S" onClick="syncM2SBtn()">
             <INPUT TYPE=button id ="syncS2M" style="width:100px;height:40px" VALUE="sync S2M" onClick="syncS2MBtn()">
             <INPUT TYPE=button id ="syncArticle" style="width:100px;height:40px" VALUE="sync Article" onClick="syncS2MArticleBtn()">
-            <select id="locationCombo" style="width:100px;height:30px" onchange="changeLocation()"></select> 
+            <!--<select id="locationCombo" style="width:100px;height:30px" onchange="changeLocation()"></select> -->
             <INPUT TYPE=button id ="delBtn" style="width:100px;height:40px" VALUE="delete" onClick="deleteRow()">
             <INPUT TYPE=button id ="colorBtn" style="width:100px;height:40px" VALUE="couleur" onClick="setColor(value)">
             <div id="palette" style="display:none;"><IMG SRC="net216.gif"  WIDTH="292" HEIGHT="196"  ALT="" USEMAP="#webpal" ></div>
             <INPUT TYPE=button id ="closeBarsBtn" style="width:100px;height:40px" VALUE="closeBars" onClick="hideMenuBars()">
             <INPUT TYPE=button id ="closeBtn" style="width:100px;height:40px" VALUE="close" onClick="closeMenu()">
+            
+            
         </div>
         
         

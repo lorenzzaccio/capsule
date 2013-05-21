@@ -3,8 +3,9 @@
  * and open the template in the editor.
  */
 
-var COL_NUMBER_STOCK = 22;
-var COOKIE_NAME="stock";
+var COL_NUMBER = 13;
+var COOKIE_NAME="username";
+var TYPE_HEADER= 1;
 
 var typeArr =  [];
 typeArr[0] = "vue_dev";
@@ -24,8 +25,10 @@ function copyRow(oriRow){
     for(j=0;j<oriRow.length;j++)
         dupRow[j]=oriRow[j];
     return dupRow;
-}            
-    
+}
+
+            
+/*    
 function loadDefaultValue(type){
     var defaultValue=[];
     if((type==selArr[TYPE_HEADER])&&(itemFocused==1)){
@@ -296,7 +299,7 @@ function loadDefaultValue(type){
     }
     return defaultValue;
 }
-
+*/
  
             
             
@@ -310,11 +313,26 @@ function getCookie(c_name)
         y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
         x=x.replace(/^\s+|\s+$/g,"");
         if (x==c_name)
-        {
+        { 
             return unescape(y);
         }
     }
     return 0;
+}
+function getCookieLength(c_name){
+    var length = 0;
+    var i,x,y,ARRcookies=document.cookie.split(";");
+    for (i=0;i<ARRcookies.length;i++)
+    {
+        x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+        y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+        x=x.replace(/^\s+|\s+$/g,"");
+        if (x.indexOf(c_name)!=-1)
+        { 
+            length=length+1;
+        }
+    }
+    return length;
 }
             
 function setCookie(c_name,value,exdays)
@@ -326,20 +344,24 @@ function setCookie(c_name,value,exdays)
 }
             
 //read cookie and insert it in a new row of the table 
-function readCookie(){
-    var arrow = [] ;
-    var i = 0;
-    do{
-        arrow = getCookie(COOKIE_NAME+i);// all items in the array.
-        if (arrow==null || arrow=="")
-        {
-        //alert("no cookie");
-        }else{
-            var mySplitResult = arrow.split(",");
-            insertRow(mySplitResult,"myTable",drawcaps);
-        }    
-        i++;
-    } while(arrow != null && arrow != "");
+// cookie start at 1, 0 is for headers
+function readCookie_caps(){
+    var tmp  ;
+    //var i = 1;
+    var l = getCookieLength(COOKIE_NAME);
+    for(var i= 1;i<=l;i++)
+    {
+        tmp =  getCookie(COOKIE_NAME+i);// all items in the array.
+        
+        //if (tmp == 0)
+        //    return;
+        
+        var mySplitResult = tmp.split(",");
+        //add line to array
+        insertRow(mySplitResult,"myTable",drawcaps);
+          
+        //i++;
+    }// while(tmp != null && tmp != "");
 }
             
 function recordLine(arrow){
@@ -482,43 +504,7 @@ function getRowCookie(cookieName){
     var items = cookie ? eval("([" + cookie + "])") : [];
     return items;
 }
-       
-function updateViewCookie(){
-    var tabView = [];
-    tabView[0] = zoomx;
-    tabView[1] = zoomy;
-    tabView[2] = zoomw;
-    tabView[3] = zoomh;
-    tabView[4] = ratioZoom;
-    setCookie("viewbox",tabView,5);
-}
-
-function readViewCookie(){
-    var tabView = [];
-    var tmp = getCookie("viewbox");
-    if (tmp==0){
-        zoomx=0;
-        zoomy=0;
-        zoomw=screenW;
-        zoomh=screenH;
-        ratioZoom=1;
-        return;
-    }
-    tabView = tmp.split(",");
-    if(!isNumber(tabView[0]) || !isNumber(tabView[1]) || !isNumber(tabView[2])|| !isNumber(tabView[3])|| !isNumber(tabView[4])){
-        zoomx=0;
-        zoomy=0;
-        zoomw=screenW;
-        zoomh=screenH;
-        ratioZoom=1;
-    }else{
-        zoomx=tabView[0];
-        zoomy=tabView[1];
-        zoomw=tabView[2];
-        zoomh=tabView[3];
-        ratioZoom=tabView[4];
-    }
-}                
+            
 
 function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);

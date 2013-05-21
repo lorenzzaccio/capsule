@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-var COL_NUMBER = 22;
+var COL_NUMBER_STOCK = 22;
 var COOKIE_NAME="stock";
 
 var typeArr =  [];
@@ -471,10 +471,10 @@ function listCookies() {
 }
 
 
-function deleteCookie(index)
+function deleteCookie(index,cookie_name)
 {
     var d = new Date();
-    document.cookie = COOKIE_NAME+index+"=; expires=Thu, 01-Jan-70 00:00:01 GMT;";
+    document.cookie = cookie_name+index+"=; expires=Thu, 01-Jan-70 00:00:01 GMT;";
 }
             
 function getRowCookie(cookieName){
@@ -482,7 +482,7 @@ function getRowCookie(cookieName){
     var items = cookie ? eval("([" + cookie + "])") : [];
     return items;
 }
-            
+       
 function updateViewCookie(){
     var tabView = [];
     tabView[0] = zoomx;
@@ -492,6 +492,7 @@ function updateViewCookie(){
     tabView[4] = ratioZoom;
     setCookie("viewbox",tabView,5);
 }
+
 function readViewCookie(){
     var tabView = [];
     var tmp = getCookie("viewbox");
@@ -517,8 +518,8 @@ function readViewCookie(){
         zoomh=tabView[3];
         ratioZoom=tabView[4];
     }
-                
-}
+}                
+
 function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
